@@ -26,7 +26,6 @@ public class OFC {
 	
 	public OFC()
 	{
-		
 		String s1 = "Data/OpticalTopology/3Point";//networkdouble";
 		int packet_num =800;
 		
