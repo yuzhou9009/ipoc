@@ -121,7 +121,7 @@ public class VirtualTransLink extends Service{
 	{
 		if(carriedPacketServices.size()>0)
 		{	
-			if((getUsedBWofVTL() + _bw) < getMaxBWCanCarried())
+			if((getUsedBWofVTL() + _bw) <= getMaxBWCanCarried())
 				return true;			
 		}		
 		return false;

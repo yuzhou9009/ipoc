@@ -28,7 +28,7 @@ public class OFC {
 	{
 		
 		String s1 = "Data/OpticalTopology/3Point";//networkdouble";
-		int packet_num =400;
+		int packet_num =800;
 		
 		VariableGraph graph_G = new VariableGraph(s1);
 		ServiceGenerator sg = new ServiceGenerator(graph_G);
@@ -42,19 +42,21 @@ public class OFC {
 		for(PacketService ps : psl)
 		{
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
-		//	consmp.put(Constraint.VTL_CARRY_C, new Constraint(Constraint.VTL_CARRY_C, VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE, "The carried vtl cann't be extended!"));
-		//	consmp.put(Constraint.PS_CARRIED_TYPE, new Constraint(Constraint.PS_CARRIED_TYPE, PacketService.STATIC_CARRIED, "The ps carried with static bw!"));
+			//consmp.put(Constraint.VTL_CARRY_C, new Constraint(Constraint.VTL_CARRY_C, VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE, "The carried vtl cann't be extended!"));
+			//consmp.put(Constraint.PS_CARRIED_TYPE, new Constraint(Constraint.PS_CARRIED_TYPE, PacketService.STATIC_CARRIED, "The ps carried with static bw!"));
 			
 			if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
 			{
 			
-				System.out.print(i+":\tps id:"+ps.id+"\t"+"priority:"+ps.s_priority+"\tsouce:"+ps.sourceVertex+"\tdest"+ps.sinkVertex+"\tbandwidth:"+ps.getCurrentBw()+"\tcarried VTL id:"+ps.carriedVTL.id+"\t");//+ps.carriedVTL.relevantOTNServices.get(0).osBelongTo.path.toString());
+				//System.out.print(i+":\tps id:"+ps.id+"\tpriority:"+ps.s_priority+"\tsouce:"+ps.sourceVertex+"\tdest"+ps.sinkVertex+"\tbandwidth:"+ps.getCurrentBw()+"\tcarried VTL id:"+ps.carriedVTL.id+"\t");//+ps.carriedVTL.relevantOTNServices.get(0).osBelongTo.path.toString());
 				//System.out.println("\tstart slot:"+ps.carriedVTL.relevantOpticalServices.get(0).start_slots);
-				System.out.println();
+				//System.out.println();
 				i++;
 			}
 			//break;
 		}
+		
+		System.out.println("Can carry ps:"+i);
 		
 		//for(OpticalService )
 		//int carried_ps = 0;
@@ -63,10 +65,11 @@ public class OFC {
 		{
 			//carried_ps +=vtl.carriedPacketServices.size();
 			try{
-				System.out.println(vtl);
+				;//System.out.println(vtl);
 			}catch(Exception e)
 			{
 				System.out.println("sdddddddddddddd");
+				/*
 				if(vtl.relevantOTNServices.size()>0)
 				{
 					for(OTNService otn: vtl.relevantOTNServices)
@@ -74,17 +77,40 @@ public class OFC {
 						if(otn.osBelongTo == null)
 							System.out.println("The wrong otn id is:"+otn.id);
 					}
-				}
+				}*/
 			}
 			
 		}
+		/***********************************************************************/
+		graph_G.clear_all_resource();
+		
+		cc.psm.clearAllServices();
+		cc.osm.clearAllServices();
+		cc.vtlm.clearAllServices();
+		cc.otnsm.clearAllServices();
+		
+		
+		
+		/************************************************************************/
+		
 		
 		int ps_used_bw = 0;
+		i = 0;
 		for(PacketService ps : psl)
 		{
+			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			
+			if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
+			{
+			
+				//System.out.print(i+":\tps id:"+ps.id+"\tpriority:"+ps.s_priority+"\tsouce:"+ps.sourceVertex+"\tdest"+ps.sinkVertex+"\tbandwidth:"+ps.getCurrentBw()+"\tcarried VTL id:"+ps.carriedVTL.id+"\t");//+ps.carriedVTL.relevantOTNServices.get(0).osBelongTo.path.toString());
+				//System.out.println("\tstart slot:"+ps.carriedVTL.relevantOpticalServices.get(0).start_slots);
+				//System.out.println();
+				i++;
+			}
 		}
 		
+		System.out.println("22Can carry ps:"+i);
 		//System.out.println(carried_ps);
 		
 /*		sm.setPacketServiceManager(psm);

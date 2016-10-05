@@ -48,4 +48,10 @@ public class OTNServiceManager implements ServiceManager{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public boolean clearAllServices() {
+		vertex_pair_otns_map.clear();
+		return false;
+	}
 }

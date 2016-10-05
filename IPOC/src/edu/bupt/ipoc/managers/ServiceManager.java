@@ -9,6 +9,8 @@ public interface ServiceManager {
 	
 	public boolean deleteService(Service ss);
 	
+	public boolean clearAllServices();
+	
 	/*
 	
 	public static final boolean CREAT_NEW_OPTIC_CHANNEL_IF_NEED = true;

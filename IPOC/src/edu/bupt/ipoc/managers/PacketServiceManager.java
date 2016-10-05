@@ -46,4 +46,10 @@ public class PacketServiceManager implements ServiceManager{
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public boolean clearAllServices() {
+		vertex_pair_ps_map.clear();
+		return false;
+	}
 }

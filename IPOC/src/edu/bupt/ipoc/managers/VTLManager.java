@@ -57,6 +57,8 @@ public class VTLManager implements ServiceManager{
 					_con_tem = cons.get(Constraint.VTL_CARRY_C);
 					if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE)
 					{
+						if(vtl.vtl_priority != priority)
+							continue;
 						_con_tem = cons.get(Constraint.INITBW_C);
 						if(vtl.canOfferMoreBW(_con_tem.value))
 							return vtl;
@@ -127,6 +129,15 @@ public class VTLManager implements ServiceManager{
 	@Override
 	public boolean deleteService(Service ss) {
 		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean clearAllServices() {
+		// TODO Auto-generated method stub
+		
+		vertex_pair_vtl_map.clear();
+		
 		return false;
 	}
 }

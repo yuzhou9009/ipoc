@@ -229,6 +229,8 @@ public class CentralizedController implements BasicController {
 					OpticalService _current_os = onts.osBelongTo;
 					if(_current_os.canOfferEnoughCapacity(_init_bw_c))
 					{
+						if(_init_bw_c % 1000 == 0)
+							System.out.println("Here");;
 						return setUpOTNServices(_current_os,_init_bw_c);					
 					}					
 				}				
@@ -311,7 +313,7 @@ public class CentralizedController implements BasicController {
 			requestBW -= OTNService.BW_1G;
 			saveService(_otn);
 			ssl.add(_otn);
-			if(requestBW < 0)
+			if(requestBW <= 0)
 				break;		
 		}
 		return ssl;

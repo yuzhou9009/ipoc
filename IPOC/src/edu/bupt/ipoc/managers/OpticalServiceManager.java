@@ -66,4 +66,10 @@ public class OpticalServiceManager implements ServiceManager{
 		return null;
 	}
 
+	@Override
+	public boolean clearAllServices() {
+		vertex_pair_os_map.clear();
+		return false;
+	}
+
 }
