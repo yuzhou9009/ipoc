@@ -71,5 +71,15 @@ public class OpticalServiceManager implements ServiceManager{
 		vertex_pair_os_map.clear();
 		return false;
 	}
+	
+	public List<OpticalService> getAllOpticalService()
+	{
+		List<OpticalService> oslall = new ArrayList<OpticalService>();
+		for(List<OpticalService> osl : vertex_pair_os_map.values())
+		{
+			oslall.addAll(osl);
+		}
+		return oslall;
+	}
 
 }

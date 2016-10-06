@@ -63,7 +63,12 @@ public class CentralizedController implements BasicController {
 				if(command == PacketService.CARRIED_REQUEST)
 					this.saveService(ss);
 				return true;
-			}			
+			}
+//			else
+//				psrh.handlerRequest(ss, command, cons);
+			System.out.println("It can not be carried, ps id:"+((PacketService)ss).id+
+					"\tthe request bw is"+((PacketService)ss).getCurrentBw()+
+					"\tpriority:"+((PacketService)ss).s_priority);
 		}		
 		else if(ss instanceof OpticalService)
 		{
@@ -77,8 +82,7 @@ public class CentralizedController implements BasicController {
 					this.saveService(ss);
 				return true;
 			}
-		}
-		
+		}		
 		return false;
 	}
 	
@@ -94,13 +98,14 @@ public class CentralizedController implements BasicController {
 				cons.put(Constraint.SOURCE_C, new Constraint(Constraint.SOURCE_C,ps.sourceVertex,"ps's source id:"+ps.sourceVertex));
 				cons.put(Constraint.DEST_C, new Constraint(Constraint.DEST_C,ps.sinkVertex,"ps's DEST id:"+ps.sinkVertex));
 				cons.put(Constraint.PRIORITY_C, new Constraint(Constraint.PRIORITY_C,ps.s_priority,"ps's priority:"+ps.s_priority));
-				if(cons.get(Constraint.PS_CARRIED_TYPE)!=null && cons.get(Constraint.PS_CARRIED_TYPE).value == PacketService.STATIC_CARRIED)
+/*				if(cons.get(Constraint.PS_CARRIED_TYPE)!=null && cons.get(Constraint.PS_CARRIED_TYPE).value == PacketService.STATIC_CARRIED)
 				{
 					cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,(int)(ps.getStaticBw()*1.3),"ps's request static bw:"+(int)(ps.getStaticBw()*1.3)));
 					System.out.println(cons.get(Constraint.INITBW_C));
 				}
 				else
-					cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps's request bw:"+ps.getCurrentBw()));
+				*/
+				cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps's request bw:"+ps.getCurrentBw()));
 								
 				//there should be a cons here	
 				return vtlm.findFitVTL(cons);
@@ -131,6 +136,12 @@ public class CentralizedController implements BasicController {
 			_vtl.setID(ServiceGenerator.generate_an_id());
 			_vtl.setSourceAndDest(ps.sourceVertex, ps.sinkVertex);
 			_vtl.setPrioriy(ps.s_priority);
+			
+			Constraint _con_tem = cons.get(Constraint.VTL_CARRY_C);
+			if(_con_tem !=null && _con_tem.value == VirtualTransLink.ADVANCED_BOD)
+			{
+				_vtl.bod_on = true;
+			}
 			
 			//the cons already be added when they try to find existing vtl			
 			//cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps current need bw is"+ps.getCurrentBw()));
@@ -204,7 +215,7 @@ public class CentralizedController implements BasicController {
 			
 			if(command == VirtualTransLink.BUILD_REQUEST)
 			{
-				if(_init_bw_c < OTNService.BW_1G)
+				if(_init_bw_c <= OTNService.BW_1G)
 				{
 					Service _ss = establishNewOneToFitRequest(_vtl,0,cons);
 					if(_ss != null)
@@ -214,11 +225,28 @@ public class CentralizedController implements BasicController {
 						return ssl;
 					}				
 				}
-				else
+				else if(OTNService.BW_1G <_init_bw_c && _init_bw_c<= (OpticalService.SUB_OTN_NUM * OTNService.BW_1G))
 				{
 					OpticalService _os = osm.findFitOs(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
 					if(_os != null)
+					{
 						return setUpOTNServices(_os,_init_bw_c);
+					}
+					else
+					{
+						_os = new OpticalService(ServiceGenerator.generate_an_id(),
+								_vtl.sourceVertex, _vtl.destVertex, 1, 0);
+						if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
+						{
+							_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
+							this.saveService(_os);
+							return setUpOTNServices(_os,_init_bw_c);
+						}
+					}
+				}
+				else
+				{
+					System.out.println("Too big bw request");
 				}
 			}			
 			else if(command == VirtualTransLink.EXTEND_REQUEST)

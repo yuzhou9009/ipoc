@@ -24,7 +24,7 @@ public class PacketService extends Service{
 	public static int ST_LIMITATION =1;
 	
 	//test
-	public static int STATIC_CARRIED = 1;
+	public static int STATIC_CARRIED = 1;	
 	
 	//data type of service, static or/and distribution data.
 	public static final int D_TIME_DISTRIBUTION_ONLY = 0;//只生成时间分布的带宽数组
@@ -82,6 +82,8 @@ public class PacketService extends Service{
 	public int time_long = 0;//if time_long is 0, it means forever.
 	
 	public int limited_bw = STATIC_100G;
+	
+	public double parameter = 1.0;
 		
 	public PacketService(int _id, int _sourceVertex, int _sinkVertex, int _s_priority, int _static_bw, int _time_long)
 	{
@@ -145,8 +147,7 @@ public class PacketService extends Service{
 			//System.out.print(real_time_bw[i]+"\t");
 		}
 		//System.out.println();
-		this.static_bw = (int)(basicBw + multiple_p*RandMax);
-		
+		this.static_bw = (int)(basicBw + multiple_p*RandMax);		
 		//real_time_bw
 	}
 	
@@ -170,16 +171,16 @@ public class PacketService extends Service{
 		int _tem = 0;
 		
 		if(this.s_priority == SP_HIGH)
-			_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(100,250);
+			_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(100,300);
 		else if(this.s_priority == SP_MID)
-			_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(200,450);
+			_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(200,400);
 		else if(this.s_priority == SP_LOW)
 		{
 			int _tt = java.util.concurrent.ThreadLocalRandom.current().nextInt(1,100);
-			if(_tt<10)
-				_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(450,1000);
+			if(_tt<50)
+				_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(450,900);
 			else
-				_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(1000,5000);
+				_tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(900,2250);
 		}
 		else
 			System.out.println("Bug here, the priority should be set as one of high,mid and low");
@@ -220,7 +221,7 @@ public class PacketService extends Service{
 //			tem_bw = this.static_bw;
 
 		else
-			tem_bw = this.real_time_bw[this.bucket_count];
+			tem_bw = (int)(this.real_time_bw[this.bucket_count] * parameter);
 		return tem_bw;
 	
 	}

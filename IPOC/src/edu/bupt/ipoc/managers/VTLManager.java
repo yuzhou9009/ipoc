@@ -57,8 +57,8 @@ public class VTLManager implements ServiceManager{
 					_con_tem = cons.get(Constraint.VTL_CARRY_C);
 					if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE)
 					{
-						if(vtl.vtl_priority != priority)
-							continue;
+						//if(vtl.vtl_priority != priority)
+						//	continue;
 						_con_tem = cons.get(Constraint.INITBW_C);
 						if(vtl.canOfferMoreBW(_con_tem.value))
 							return vtl;

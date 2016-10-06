@@ -24,6 +24,7 @@ public class VirtualTransLink extends Service{
 	
 	//test
 	public static final int CAN_NOT_BE_EXTEND_BUT_SHARE = 1;
+	public static final int  ADVANCED_BOD = 2;
 	
 	//
 	public static final int BW_EMPTY = 0;
@@ -37,6 +38,8 @@ public class VirtualTransLink extends Service{
 	public int max_carried_ps = VTL_MAX_CARRIED_PS_LOW;
 	
 	public int bw_capacity = BW_EMPTY;// the upper is 4Z bit, so int is enough right now.
+	
+	public boolean bod_on = false;
 	
 	public List<PacketService> carriedPacketServices = null;
 	
@@ -120,15 +123,42 @@ public class VirtualTransLink extends Service{
 	public boolean canOfferMoreBW(int _bw)
 	{
 		if(carriedPacketServices.size()>0)
-		{	
-			if((getUsedBWofVTL() + _bw) <= getMaxBWCanCarried())
-				return true;			
+		{
+			if(bod_on)
+			{
+				double _tem = 1.0;
+				if(vtl_priority == VTL_P_HIGH)
+					_tem = 0.75;
+				else if(vtl_priority == VTL_P_MID)
+					_tem = 0.85;
+				else if(vtl_priority == VTL_P_LOW)
+					_tem = 0.95;
+				
+				if((getUsedBWofVTL() + _bw) <= (getMaxBWCanCarried()*_tem))
+					return true;
+			}
+			else
+			{
+				if((getUsedBWofVTL() + _bw) <= getMaxBWCanCarried())
+					return true;
+			}
 		}		
 		return false;
 	}
 	
 	public int getRestBW()
 	{
+		if(bod_on)
+		{
+			if(vtl_priority == VTL_P_HIGH)
+				return (int)(getMaxBWCanCarried() * 0.75) - getUsedBWofVTL();
+			else if(vtl_priority == VTL_P_MID)
+				return (int)(getMaxBWCanCarried() * 0.85) - getUsedBWofVTL();
+			else if(vtl_priority == VTL_P_LOW)
+				return (int)(getMaxBWCanCarried() * 0.95) - getUsedBWofVTL();
+		}
+		
+		//	_tem = 0.95;
 		return getMaxBWCanCarried() - getUsedBWofVTL();
 	}
 	
@@ -191,6 +221,22 @@ public class VirtualTransLink extends Service{
 		}
 		else
 			return 0;
+	}
+	
+	public int howManyOTNAreNeedForthis(int _bw)
+	{
+		int _chushu = 1000;
+		if(bod_on)
+		{
+			if(this.vtl_priority == VTL_P_HIGH)
+				_chushu = 750;
+			else if(this.vtl_priority == VTL_P_MID)
+				_chushu = 850;
+		}
+		if((_bw%_chushu) > 0)
+			return (_bw/_chushu) + 1;
+		else
+			return _bw/_chushu;
 	}
 	
 	public String toString()
