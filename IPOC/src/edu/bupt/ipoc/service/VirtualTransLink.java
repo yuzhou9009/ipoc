@@ -26,6 +26,8 @@ public class VirtualTransLink extends Service{
 	public static final int CAN_NOT_BE_EXTEND_BUT_SHARE = 1;
 	public static final int  ADVANCED_BOD = 2;
 	
+	
+	
 	//
 	public static final int BW_EMPTY = 0;
 	
@@ -160,6 +162,11 @@ public class VirtualTransLink extends Service{
 		
 		//	_tem = 0.95;
 		return getMaxBWCanCarried() - getUsedBWofVTL();
+	}
+	
+	public int getAcutallyRestBW()
+	{
+		return (int)(getMaxBWCanCarried() * 0.95) - getUsedBWofVTL();
 	}
 	
 	public int getMaxBWCanCarried()

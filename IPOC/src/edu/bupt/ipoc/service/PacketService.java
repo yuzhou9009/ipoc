@@ -84,6 +84,8 @@ public class PacketService extends Service{
 	public int limited_bw = STATIC_100G;
 	
 	public double parameter = 1.0;
+	
+	public List<PacketServiceChild> pscs = null;
 		
 	public PacketService(int _id, int _sourceVertex, int _sinkVertex, int _s_priority, int _static_bw, int _time_long)
 	{
@@ -225,6 +227,33 @@ public class PacketService extends Service{
 		return tem_bw;
 	
 	}
+	
+	
+/*	public void setCurrentBw(int _bw)
+	{
+		//int tem_bw;
+		if(this.service_flag == PacketService.D_STATIC)
+		{
+			this.static_bw -= _bw;
+			if(this.static_bw < 0)
+				System.out.println("Wrongwrongwrong");
+		}
+//need to be modified
+//		else if(this.special_child_flag == true)
+//			tem_bw = this.static_bw;
+
+		else
+		{
+			this.real_time_bw[this.bucket_count] -= _bw;
+			if(this.real_time_bw[this.bucket_count]<0)
+
+				System.out.println("Wrongwrongwrong");
+		}
+		//return tem_bw;
+		//return false;
+	
+	}
+	*/
 	
 	public void showMyselfCurrentState()
 	{

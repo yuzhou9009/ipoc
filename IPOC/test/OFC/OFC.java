@@ -16,6 +16,7 @@ import edu.bupt.ipoc.managers.ServiceManager;
 import edu.bupt.ipoc.service.OTNService;
 import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.PacketService;
+import edu.bupt.ipoc.service.PacketServiceChild;
 import edu.bupt.ipoc.service.ServiceGenerator;
 import edu.bupt.ipoc.service.VirtualTransLink;
 
@@ -28,7 +29,7 @@ public class OFC {
 	public OFC()
 	{
 		String s1 = "Data/OpticalTopology/3Point";//networkdouble";
-		int packet_num =800;
+		int packet_num =100;
 		
 		VariableGraph graph_G = new VariableGraph(s1);
 		ServiceGenerator sg = new ServiceGenerator(graph_G);
@@ -38,6 +39,13 @@ public class OFC {
 		//CentralizedController cc = new CentralizedController(graph_G);
 		
 		int i = 0;
+		
+		int all_carried_bw = 0;
+		for(PacketService ps : psl)
+		{
+			all_carried_bw+=ps.getCurrentBw();
+		}		
+		System.out.println("11orignal Carried bw:"+all_carried_bw);
 		
 		for(PacketService ps : psl)
 		{
@@ -90,6 +98,8 @@ public class OFC {
 			}
 			
 		}
+		System.out.println();
+		
 		/***********************************************************************/
 		graph_G.clear_all_resource();
 		
@@ -135,7 +145,8 @@ public class OFC {
 		}
 		//int carried_ps = 0;
 		System.out.println("Occupied bw:"+occupied_bw);
-		
+				
+		System.out.println();
 		
 		
 		
@@ -184,6 +195,9 @@ public class OFC {
 		}
 		//int carried_ps = 0;
 		System.out.println("Occupied bw:"+occupied_bw);
+		System.out.println();
+		
+		
 		
 		/***********************************************************************/
 		graph_G.clear_all_resource();
@@ -218,9 +232,9 @@ public class OFC {
 				sort_ps_3.add(ps);
 		}
 		
+		//System.out.println("There are priority 3 is :"+sort_ps_3.size());
 		sort_ps_1.addAll(sort_ps_2);
 		sort_ps_1.addAll(sort_ps_3);
-		
 		
 		for(PacketService ps : sort_ps_1)
 		{
@@ -254,6 +268,14 @@ public class OFC {
 		}
 		//int carried_ps = 0;
 		System.out.println("Occupied bw:"+occupied_bw);
+		
+		
+//		all_carried_bw = 0;
+//		for(VirtualTransLink vtl: cc.vtlm.getAllVTLs())
+//		{
+///			all_carried_bw += vtl.getUsedBWofVTL();
+//		}
+//		System.out.println("Carried bw:"+all_carried_bw);
 		//System.out.println(carried_ps);
 		
 /*		sm.setPacketServiceManager(psm);
@@ -312,6 +334,8 @@ public class OFC {
 			}				
 		}
 		*/
+		
+		
 	}
 	
 	

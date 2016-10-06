@@ -18,6 +18,7 @@ import edu.bupt.ipoc.managers.VTLManager;
 import edu.bupt.ipoc.service.OTNService;
 import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.PacketService;
+import edu.bupt.ipoc.service.PacketServiceChild;
 import edu.bupt.ipoc.service.Service;
 import edu.bupt.ipoc.service.ServiceGenerator;
 import edu.bupt.ipoc.service.VirtualTransLink;
@@ -98,17 +99,66 @@ public class CentralizedController implements BasicController {
 				cons.put(Constraint.SOURCE_C, new Constraint(Constraint.SOURCE_C,ps.sourceVertex,"ps's source id:"+ps.sourceVertex));
 				cons.put(Constraint.DEST_C, new Constraint(Constraint.DEST_C,ps.sinkVertex,"ps's DEST id:"+ps.sinkVertex));
 				cons.put(Constraint.PRIORITY_C, new Constraint(Constraint.PRIORITY_C,ps.s_priority,"ps's priority:"+ps.s_priority));
-/*				if(cons.get(Constraint.PS_CARRIED_TYPE)!=null && cons.get(Constraint.PS_CARRIED_TYPE).value == PacketService.STATIC_CARRIED)
+				cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps's request bw:"+ps.getCurrentBw()));
+				
+				
+				Constraint _con = cons.get(Constraint.VTL_CARRY_C);
+				if(_con !=null && _con.value == VirtualTransLink.ADVANCED_BOD && ps.s_priority == PacketService.SP_LOW)
 				{
-					cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,(int)(ps.getStaticBw()*1.3),"ps's request static bw:"+(int)(ps.getStaticBw()*1.3)));
-					System.out.println(cons.get(Constraint.INITBW_C));
+					List<VirtualTransLink> vtls = vtlm.findFitVTLs(cons);
+					if(vtls != null)
+					{
+						{
+							//test
+							int _arbw = ps.getCurrentBw();
+							int bww = 0;
+							for(VirtualTransLink vsss : vtls)
+							{
+								bww += vsss.getAcutallyRestBW();
+							}
+							if(bww<_arbw)
+								System.out.println("big problem");
+						}
+						
+						
+						
+						int _all_bw = ps.getCurrentBw();
+						int _bw = 0;
+						ps.pscs = new ArrayList<PacketServiceChild>();
+						for(VirtualTransLink vtl : vtls)
+						{
+							_bw = vtl.getAcutallyRestBW();
+							if(_bw > _all_bw)
+							{
+								_bw = _all_bw;
+							}
+							PacketServiceChild psc = null;
+							if(_bw <= PacketService.STATIC_MIN_RATE)
+							{
+								psc = new PacketServiceChild(ServiceGenerator.generate_an_id(),
+										ps.sourceVertex,ps.sinkVertex,ps.s_priority,PacketService.STATIC_MIN_RATE,0);
+								psc.static_bw = _bw;
+								//_bw = PacketService.STATIC_MIN_RATE;
+							}
+							else
+							{
+								psc = new PacketServiceChild(ServiceGenerator.generate_an_id(),
+										ps.sourceVertex,ps.sinkVertex,ps.s_priority,_bw,0);
+							}
+									
+							_all_bw -= _bw;
+							ps.pscs.add(psc);
+							mappingServices(psc, vtl, null);							
+						}
+						if(_all_bw>0)
+							System.out.println("There is a big mistake come on the _all_bw is"+ _all_bw);
+						
+						
+						return ps;
+					} 
 				}
 				else
-				*/
-				cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps's request bw:"+ps.getCurrentBw()));
-								
-				//there should be a cons here	
-				return vtlm.findFitVTL(cons);
+					return vtlm.findFitVTL(cons);
 			}
 		}
 		else if(ss instanceof OTNService)
@@ -217,7 +267,7 @@ public class CentralizedController implements BasicController {
 			{
 				if(_init_bw_c <= OTNService.BW_1G)
 				{
-					Service _ss = establishNewOneToFitRequest(_vtl,0,cons);
+					Service _ss = establishNewOneToFitRequest(_vtl,command,cons);
 					if(_ss != null)
 					{
 						List<Service> ssl = new ArrayList<Service>();

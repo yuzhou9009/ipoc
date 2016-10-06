@@ -12,10 +12,12 @@ public class Constraint {
 	
 //	public static final int OS_TYPE = 5;
 	
+
+	
 	public static final int PS_CARRIED_TYPE = 6;
 	public static final int VTL_CARRY_C = 7;
 	
-	
+	public static final int FENJI_C = 8;	
 	
 	public int type;
 	public int value;
