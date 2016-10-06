@@ -67,9 +67,9 @@ public class CentralizedController implements BasicController {
 			}
 //			else
 //				psrh.handlerRequest(ss, command, cons);
-			System.out.println("It can not be carried, ps id:"+((PacketService)ss).id+
-					"\tthe request bw is"+((PacketService)ss).getCurrentBw()+
-					"\tpriority:"+((PacketService)ss).s_priority);
+			//System.out.println("It can not be carried, ps id:"+((PacketService)ss).id+
+			//		"\tthe request bw is"+((PacketService)ss).getCurrentBw()+
+			//		"\tpriority:"+((PacketService)ss).s_priority);
 		}		
 		else if(ss instanceof OpticalService)
 		{
@@ -262,6 +262,14 @@ public class CentralizedController implements BasicController {
 			}
 			
 			VirtualTransLink _vtl = (VirtualTransLink) ss;
+			
+			if(_vtl.bod_on == true)
+			{
+				if(_vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH)
+					_init_bw_c = (int)(_init_bw_c/0.75)+1;
+				else if(_vtl.vtl_priority == VirtualTransLink.VTL_P_MID)
+					_init_bw_c = (int)(_init_bw_c/0.85)+1;
+			}
 			
 			if(command == VirtualTransLink.BUILD_REQUEST)
 			{

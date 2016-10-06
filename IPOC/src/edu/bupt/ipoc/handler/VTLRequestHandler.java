@@ -74,7 +74,7 @@ public class VTLRequestHandler
 			}
 			else if(vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
 			{
-				Service _tem = bc.establishNewOneToFitRequest(vtl, UseOpticalService, null);
+				Service _tem = bc.establishNewOneToFitRequest(vtl, UseOpticalService, cons);
 				 if(_tem != null)
 				{
 					bc.mappingServices(vtl, _tem, null);
