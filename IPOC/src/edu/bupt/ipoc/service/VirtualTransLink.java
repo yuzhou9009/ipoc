@@ -250,11 +250,11 @@ public class VirtualTransLink extends Service{
 	{
 		if(relevantOTNServices.size()>0)
 		{
-			return relevantOTNServices.get(0).osBelongTo.path.get_weight();
+			return relevantOTNServices.get(0).osBelongTo.path.get_weight() + 5;
 		}
 		else if(relevantOpticalServices.size()>0)
 		{
-			return relevantOpticalServices.get(0).path.get_weight();
+			return relevantOpticalServices.get(0).path.get_weight() + 5;
 		}
 		else
 			return -1.0;
