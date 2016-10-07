@@ -105,9 +105,9 @@ public class ServiceGenerator {
 			}
 			
 			tem = java.util.concurrent.ThreadLocalRandom.current().nextInt(1,100);
-			if(tem<50)
+			if(tem<40)
 				_priority = 1;
-			else if(tem>=50 && tem <=90)
+			else if(tem>=40 && tem <=80)
 				_priority = 2;
 			else
 				_priority = 3;

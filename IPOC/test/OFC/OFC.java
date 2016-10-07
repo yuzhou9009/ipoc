@@ -28,8 +28,8 @@ public class OFC {
 	
 	public OFC()
 	{
-		String s1 = "Data/OpticalTopology/networkdouble";//networkdouble";
-		int packet_num =5000;
+		String s1 = "Data/OpticalTopology/networkdouble";
+		int packet_num =3000;
 		
 		VariableGraph graph_G = new VariableGraph(s1);
 		ServiceGenerator sg = new ServiceGenerator(graph_G);
@@ -39,7 +39,21 @@ public class OFC {
 		//CentralizedController cc = new CentralizedController(graph_G);
 		
 		int i = 0;
-		int rolling_time =  1;//PacketService.TIME_BUCKET_NUM;
+		int rolling_time =  PacketService.TIME_BUCKET_NUM;
+		
+		int[] ps_bw = new int[240];
+		
+		for(int time = 0; time<rolling_time;time++)
+		{
+			int _actualBW = 0;
+			for(PacketService pss : psl)
+			{
+				_actualBW += pss.real_time_bw[time];
+			}
+			ps_bw[time] = _actualBW;
+			//System.out.println(time+"\t"+_actualBW);
+		}
+		
 		
 		int all_carried_bw = 0;
 		for(PacketService ps : psl)
@@ -51,6 +65,7 @@ public class OFC {
 		for(PacketService ps : psl)
 		{
 			ps.service_flag = PacketService.D_STATIC;
+			ps.parameter = 1.1764;
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			consmp.put(Constraint.VTL_CARRY_C, new Constraint(Constraint.VTL_CARRY_C, VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE, "The carried vtl cann't be extended!"));
 			//consmp.put(Constraint.PS_CARRIED_TYPE, new Constraint(Constraint.PS_CARRIED_TYPE, PacketService.STATIC_CARRIED, "The ps carried with static bw!"));
@@ -66,7 +81,7 @@ public class OFC {
 			//break;
 		}
 		
-		System.out.print("11:Can carry ps:"+i);
+		System.out.print("11:Can carry ps:\t"+i);
 		int occupied_bw = 0;
 		
 		for(OpticalService os : cc.osm.getAllOpticalService())
@@ -77,13 +92,20 @@ public class OFC {
 				occupied_bw += OpticalService.BW_10G;
 		}
 		//int carried_ps = 0;
-		System.out.println("Occupied bw:"+occupied_bw);
+		System.out.println("\tOccupied bw:\t"+occupied_bw);
+		
+		for(int time = 0; time<rolling_time;time++)
+		{
+			System.out.println(1+time*0.0001+"\t:utilization\t"+ps_bw[time]*1.0/occupied_bw);
+			//System.out.println(time+"\t"+_actualBW);
+		}
+
 		
 		for(VirtualTransLink vtl : cc.vtlm.getAllVTLs())
 		{
 			//carried_ps +=vtl.carriedPacketServices.size();
 			try{
-				;//System.out.println(vtl);
+				;//System.out.println(vtl.getPathLong());
 			}catch(Exception e)
 			{
 				System.out.println("sdddddddddddddd");
@@ -99,7 +121,19 @@ public class OFC {
 			}
 			
 		}
-		System.out.println();
+		
+		double latency = 0.0;
+		for(PacketService _pp : psl)
+		{
+			_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
+			if(_pp.s_priority == PacketService.SP_HIGH || _pp.s_priority == PacketService.SP_MID)
+			{
+				if(_pp.carriedVTL!=null)
+				latency += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong()*_pp.s_priority);
+			}
+		}
+		latency = latency/ ps_bw[0];
+		System.out.println("1:latency is"+latency);
 		
 		/***********************************************************************/
 		graph_G.clear_all_resource();
@@ -138,7 +172,7 @@ public class OFC {
 				}
 			}
 			
-			System.out.print("22:"+time+":Can carry ps:"+i);
+			System.out.print((2+0.0001*time)+"\t:Can carry ps:\t"+i);
 			
 			occupied_bw = 0;
 			
@@ -150,9 +184,17 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.println("\tOccupied bw:"+occupied_bw);
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t utilization:\t"+(ps_bw[time]*1.0/occupied_bw));
 					
-			
+			latency = 0.0;
+			for(PacketService _pp : psl)
+			{
+				_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
+				if(_pp.s_priority == PacketService.SP_HIGH || _pp.s_priority == PacketService.SP_MID)
+					latency += (_pp.getCurrentBw()*1.0/(_pp.s_priority*_pp.carriedVTL.getPathLong()));
+			}
+			latency = latency/ ps_bw[time];
+			System.out.println("\t:latency is:\t"+latency);
 			
 			
 			
@@ -170,7 +212,7 @@ public class OFC {
 		}
 		
 		
-		System.out.println();
+		//System.out.println();
 		////////////////////////////////////////////////////////////
 		
 		for(int time = 0; time<rolling_time;time++)
@@ -181,7 +223,7 @@ public class OFC {
 			for(PacketService ps : psl)
 			{
 				ps.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
-				ps.parameter = 1.0;
+				ps.parameter = 1.1764;
 				ps.bucket_count = time;
 				Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 				
@@ -195,7 +237,7 @@ public class OFC {
 				}
 			}
 			
-			System.out.print("33:"+time+"Can carry ps:"+i);
+			System.out.print((3+0.0001*time)+"\t:Can carry ps:\t"+i);
 			
 			occupied_bw = 0;
 			
@@ -207,9 +249,17 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.println("\tOccupied bw:"+occupied_bw);
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t utilization:\t"+(ps_bw[time]*1.0/occupied_bw));
 			
-			
+			latency = 0.0;
+			for(PacketService _pp : psl)
+			{
+				_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
+				if(_pp.s_priority == PacketService.SP_HIGH || _pp.s_priority == PacketService.SP_MID)
+					latency += (_pp.getCurrentBw()*1.0/(_pp.s_priority*_pp.carriedVTL.getPathLong()));
+			}
+			latency = latency/ ps_bw[time];
+			System.out.println("\t:latency is:\t"+latency);
 			
 			
 			/***********************************************************************/
@@ -226,7 +276,7 @@ public class OFC {
 			
 		}
 		
-		System.out.println();
+		//System.out.println();
 		
 		for(int time = 0; time<rolling_time;time++)
 		{
@@ -273,7 +323,7 @@ public class OFC {
 				}
 			}
 			
-			System.out.print("44:"+time+"Can carry ps:"+i);
+			System.out.print((4+0.0001*time)+"\t:Can carry ps:\t"+i);
 			
 			occupied_bw = 0;
 			
@@ -285,7 +335,25 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.println("\tOccupied bw:"+occupied_bw);
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t utilization:\t"+(ps_bw[time]*1.0/occupied_bw));
+			
+			latency = 0.0;
+			for(PacketService _pp : psl)
+			{
+				_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
+				if(_pp.s_priority == PacketService.SP_HIGH || _pp.s_priority == PacketService.SP_MID)
+					latency += (_pp.getCurrentBw()*1.0/(_pp.s_priority*_pp.carriedVTL.getPathLong()));
+			}
+			latency = latency/ ps_bw[time];
+			System.out.println("\t:latency is:\t"+latency);
+			/*
+			if(time == 239)
+			{
+				for(VirtualTransLink vtt : cc.vtlm.getAllVTLs())
+				{
+					System.out.println(vtt.getUsedBWofVTL()*1.0/vtt.bw_capacity);
+				}
+			}*/
 			
 			/***********************************************************************/
 			graph_G.clear_all_resource();

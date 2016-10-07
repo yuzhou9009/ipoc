@@ -117,7 +117,7 @@ public class CentralizedController implements BasicController {
 								bww += vsss.getAcutallyRestBW();
 							}
 							if(bww<_arbw)
-								System.out.println("big problem");
+								System.out.println("big problem£¬the different value is"+ (bww-_arbw));
 						}
 						
 						
@@ -151,7 +151,7 @@ public class CentralizedController implements BasicController {
 							mappingServices(psc, vtl, null);							
 						}
 						if(_all_bw>0)
-							System.out.println("There is a big mistake come on the _all_bw is"+ _all_bw);
+							;//System.out.println("There is a big mistake come on the _all_bw is"+ _all_bw);
 						
 						
 						return ps;
@@ -315,8 +315,6 @@ public class CentralizedController implements BasicController {
 					OpticalService _current_os = onts.osBelongTo;
 					if(_current_os.canOfferEnoughCapacity(_init_bw_c))
 					{
-						if(_init_bw_c % 1000 == 0)
-							System.out.println("Here");;
 						return setUpOTNServices(_current_os,_init_bw_c);					
 					}					
 				}				

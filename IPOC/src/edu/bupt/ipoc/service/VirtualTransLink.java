@@ -246,6 +246,20 @@ public class VirtualTransLink extends Service{
 			return _bw/_chushu;
 	}
 	
+	public double getPathLong()
+	{
+		if(relevantOTNServices.size()>0)
+		{
+			return relevantOTNServices.get(0).osBelongTo.path.get_weight();
+		}
+		else if(relevantOpticalServices.size()>0)
+		{
+			return relevantOpticalServices.get(0).path.get_weight();
+		}
+		else
+			return -1.0;
+	}
+	
 	public String toString()
 	{
 		String describtion = new String();

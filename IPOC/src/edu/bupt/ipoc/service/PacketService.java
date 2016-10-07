@@ -217,7 +217,7 @@ public class PacketService extends Service{
 	{
 		int tem_bw;
 		if(this.service_flag == PacketService.D_STATIC)
-			tem_bw = this.static_bw;
+			tem_bw = (int)(this.static_bw * parameter);
 //need to be modified
 //		else if(this.special_child_flag == true)
 //			tem_bw = this.static_bw;
