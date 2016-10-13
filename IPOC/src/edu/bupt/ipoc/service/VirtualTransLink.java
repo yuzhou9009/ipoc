@@ -12,7 +12,7 @@ public class VirtualTransLink extends Service{
 	public static final int EXTEND_REQUEST = 3;
 	
 	
-	//The highest priority of carried packet service.
+	//The highest priority of carried packet service. these should be unified with the priorities of packet service.
 	public static final int VTL_P_HIGH = 1;
 	public static final int VTL_P_MID = 2;
 	public static final int VTL_P_LOW = 3;
@@ -24,9 +24,13 @@ public class VirtualTransLink extends Service{
 	
 	//test
 	public static final int CAN_NOT_BE_EXTEND_BUT_SHARE = 1;
-	public static final int  ADVANCED_BOD = 2;
+	//public static final int VTL_BOD = 2;
 	
+	public static final int MIN_SHARED_BW_GRANULARITY = 50;
 	
+	public double th_usp_high = 0.75;
+	public double th_usp_mid = 0.85;
+	public double th_usp_low = 0.95;
 	
 	//
 	public static final int BW_EMPTY = 0;
@@ -69,8 +73,8 @@ public class VirtualTransLink extends Service{
 	
 	public void setPrioriy(int _priority)
 	{
-		if(_priority < this.vtl_priority)//higher
-			this.vtl_priority = _priority;
+		//if(_priority < this.vtl_priority)//higher
+		this.vtl_priority = _priority;
 	}
 	
 	public void addRelevantOpticalService(OpticalService _os)
@@ -122,7 +126,7 @@ public class VirtualTransLink extends Service{
 		return false;
 	}
 	
-	public boolean canOfferMoreBW(int _bw)
+	public boolean canOfferMoreBW(int _bw)//just offer bw for the same priority
 	{
 		if(carriedPacketServices.size()>0)
 		{
@@ -130,11 +134,11 @@ public class VirtualTransLink extends Service{
 			{
 				double _tem = 1.0;
 				if(vtl_priority == VTL_P_HIGH)
-					_tem = 0.75;
+					_tem = th_usp_high;
 				else if(vtl_priority == VTL_P_MID)
-					_tem = 0.85;
+					_tem = th_usp_mid;
 				else if(vtl_priority == VTL_P_LOW)
-					_tem = 0.95;
+					_tem = th_usp_low;
 				
 				if((getUsedBWofVTL() + _bw) <= (getMaxBWCanCarried()*_tem))
 					return true;
@@ -153,15 +157,20 @@ public class VirtualTransLink extends Service{
 		if(bod_on)
 		{
 			if(vtl_priority == VTL_P_HIGH)
-				return (int)(getMaxBWCanCarried() * 0.75) - getUsedBWofVTL();
+				return (int)(getMaxBWCanCarried() * th_usp_high) - getUsedBWofVTL();
 			else if(vtl_priority == VTL_P_MID)
-				return (int)(getMaxBWCanCarried() * 0.85) - getUsedBWofVTL();
+				return (int)(getMaxBWCanCarried() * th_usp_mid) - getUsedBWofVTL();
 			else if(vtl_priority == VTL_P_LOW)
-				return (int)(getMaxBWCanCarried() * 0.95) - getUsedBWofVTL();
+				return (int)(getMaxBWCanCarried() * th_usp_low) - getUsedBWofVTL();
 		}
-		
-		//	_tem = 0.95;
 		return getMaxBWCanCarried() - getUsedBWofVTL();
+	}
+	
+	public int getAcutallyRestBWforShare()
+	{
+		if(vtl_priority == VTL_P_LOW)
+			return getAcutallyRestBW();
+		return (getAcutallyRestBW()/MIN_SHARED_BW_GRANULARITY)*MIN_SHARED_BW_GRANULARITY;
 	}
 	
 	public int getAcutallyRestBW()

@@ -14,7 +14,7 @@ public class PacketService extends Service{
 	public static int CARRIED_REQUEST = 1;
 	public static int REMOVED_REQUEST = 2;
 	
-	//service priority
+	//service priority these should be unified with the priorities of its carried service(VirtualTransLink).
 	public static int SP_HIGH = 1;
 	public static int SP_MID = 2;
 	public static int SP_LOW = 3;
@@ -24,7 +24,8 @@ public class PacketService extends Service{
 	public static int ST_LIMITATION =1;
 	
 	//test
-	public static int STATIC_CARRIED = 1;	
+	public static int STATIC_CARRIED = 1;
+	public static int VTL_BOD = 2;
 	
 	//data type of service, static or/and distribution data.
 	public static final int D_TIME_DISTRIBUTION_ONLY = 0;//只生成时间分布的带宽数组

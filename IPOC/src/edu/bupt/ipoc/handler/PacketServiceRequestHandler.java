@@ -8,14 +8,8 @@ import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
 
-public class PacketServiceRequestHandler 
-		implements RequestHanderInterface {
+public class PacketServiceRequestHandler{
 
-//	OpticalResourceRequestHandler orrh = null;
-//	VTLRequestHandler vtlrh = null;
-//	OTNRequestHandler otnrh = null;
-	//ServiceManager sm = null;
-	
 	BasicController bc;
 	
 	public PacketServiceRequestHandler(BasicController _bc)
@@ -23,42 +17,48 @@ public class PacketServiceRequestHandler
 		bc = _bc;
 	}
 
-	@Override
-	public synchronized boolean handlerRequest(Service _ss, int command, Map<Integer,Constraint> cons) 
+	public synchronized boolean handlerRequest(PacketService ps, int command, Map<Integer,Constraint> cons) 
 	{
-		PacketService ps = null;
-		if(_ss instanceof PacketService)
-		{
-			ps = (PacketService)_ss;
-		}
-		else
-		{
-			System.out.println("PacketServiceRequestHandler can only handle PacketService request!");
-			return false;
-		}
 		if(command == PacketService.CARRIED_REQUEST)// || command == PacketService.Modify)
 		{
-			Service _tem = null;
-			_tem = bc.findExistOneToFitRequest(ps,command, cons);
-			if(_tem != null)
+			cons.put(Constraint.SOURCE_C, new Constraint(Constraint.SOURCE_C,ps.sourceVertex,"ps's source id:"+ps.sourceVertex));
+			cons.put(Constraint.DEST_C, new Constraint(Constraint.DEST_C,ps.sinkVertex,"ps's DEST id:"+ps.sinkVertex));
+			cons.put(Constraint.PRIORITY_C, new Constraint(Constraint.PRIORITY_C,ps.s_priority,"ps's priority:"+ps.s_priority));
+			cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentBw(),"ps's request bw:"+ps.getCurrentBw()));
+			
+			Constraint _con = cons.get(Constraint.VTL_CARRY_TYPE_C);
+			if(_con !=null && _con.value == PacketService.VTL_BOD && ps.s_priority == PacketService.SP_LOW)
 			{
-				//System.out.println("We are here!! "+ _tem.toString());
-				bc.mappingServices(ps, _tem, null);
-				return true;
+				List<Service> _tems = null;
+				_tems = bc.findExistOnesToFitRequest(ps,command, cons);
+				if(_tems != null && _tems.size()>0)
+				{
+					bc.mappingServices(ps, _tems, cons);
+					return true;					
+				}				
 			}
 			else
 			{
-				_tem = bc.establishNewOneToFitRequest(ps, command, cons);
+				Service _tem = null;
+				_tem = bc.findExistOneToFitRequest(ps,command, cons);
 				if(_tem != null)
 				{
 					bc.mappingServices(ps, _tem, null);
 					return true;
 				}
-				else
-					return false;
 			}
+			
+			//if we cannot find appropriate vtl(s)
+			Service _tem = null;
+			_tem = bc.establishNewOneToFitRequest(ps, command, cons);
+			if(_tem != null)
+			{
+				bc.mappingServices(ps, _tem, null);
+				return true;
+			}
+			else
+				return false;
 		}
-
 		return false;
 	}
 }

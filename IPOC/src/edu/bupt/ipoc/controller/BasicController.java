@@ -1,5 +1,6 @@
 package edu.bupt.ipoc.controller;
 
+import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
 
 import java.util.List;
@@ -15,8 +16,9 @@ public interface BasicController {
 	public Service establishNewOneToFitRequest(Service ss, int command, Map<Integer,Constraint> cons);
 	public List<Service> establishNewOnesToFitRequest(Service ss, int command, Map<Integer,Constraint> cons);
 	public boolean mappingServices(Service ss1, Service ss2, Map<Integer,Constraint> cons);
+	public boolean mappingServices(Service ss, List<Service> _tems, Map<Integer, Constraint> cons);
 	
-	public void saveService(Service ss);
-	
+	public void saveService(Service ss);	
+	public void clearAll();
 
 }

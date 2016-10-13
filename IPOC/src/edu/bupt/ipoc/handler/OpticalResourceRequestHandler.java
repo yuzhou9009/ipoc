@@ -12,8 +12,7 @@ import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.resource.OpticalLink;
 import edu.bupt.ipoc.service.*;
 
-public class OpticalResourceRequestHandler 
-		implements RequestHanderInterface{
+public class OpticalResourceRequestHandler{
 	
 	public static final int BUILD = 0;
 	public static final int DELE = 1;
@@ -109,18 +108,8 @@ public class OpticalResourceRequestHandler
 		
 	}
 	
-	@Override
-	public synchronized boolean handlerRequest(Service _traffic_to_be_handle,int requetType, Map<Integer,Constraint> constraints)//int diffirent_alg)
-	{
-		OpticalService traffic_to_be_handle = null;
-		if(_traffic_to_be_handle instanceof OpticalService)
-			traffic_to_be_handle = (OpticalService)_traffic_to_be_handle;
-		else
-		{
-			System.out.println("The optical resource handler can only handler optical service request!");
-			return false;
-		}
-		
+	public synchronized boolean handlerRequest(OpticalService traffic_to_be_handle,int requetType, Map<Integer,Constraint> constraints)//int diffirent_alg)
+	{		
 		if(requetType == OpticalService.BUILD_REQUEST)// && diffirent_alg == FIRST_FIT )
 		{
 			if(ask_resource_for_traffic_FIRST(traffic_to_be_handle))

@@ -55,7 +55,7 @@ public class VTLManager implements ServiceManager{
 				
 				for(VirtualTransLink vtl : vtll)
 				{
-					_con_tem = cons.get(Constraint.VTL_CARRY_C);
+					_con_tem = cons.get(Constraint.VTL_CARRY_TYPE_C);
 					if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE)
 					{
 						if(vtl.vtl_priority != priority)
@@ -102,6 +102,7 @@ public class VTLManager implements ServiceManager{
 	
 	public List<VirtualTransLink> findFitVTLs(Map<Integer, Constraint> cons) {
 		
+		//first make sure we have all needed constraints.
 		if(cons.isEmpty())
 			return null;
 		
@@ -127,7 +128,7 @@ public class VTLManager implements ServiceManager{
 		if(_con_tem != null)
 			allRequestBW = _con_tem.value;
 		
-		if(source >=0  && dest >= 0 && priority >= 1 && allRequestBW >= 1)
+		if(source >=0  && dest >= 0 && priority == VirtualTransLink.VTL_P_LOW && allRequestBW >= 1)//sure
 		{
 			List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer, Integer>(source,dest));
 			if(vtll != null && !vtll.isEmpty())
@@ -138,7 +139,7 @@ public class VTLManager implements ServiceManager{
 				{
 					if(vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH || vtl.vtl_priority == VirtualTransLink.VTL_P_MID)
 					{
-						canOfferBW = vtl.getAcutallyRestBW();
+						canOfferBW = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
 						if(canOfferBW > 0)
 						{
 							allRequestBW -= canOfferBW;
@@ -156,7 +157,7 @@ public class VTLManager implements ServiceManager{
 				}
 				if(allRequestBW > 0)
 				{
-					for(VirtualTransLink vtl : vtll)
+					for(VirtualTransLink vtl : vtll)//there need to be modified, the low flow should can be carried in different VTL_OS
 					{
 						if(vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
 						{
@@ -168,7 +169,8 @@ public class VTLManager implements ServiceManager{
 							}
 						}
 					}
-				}					
+				}
+				/*
 				if(allRequestBW > 0)
 				{
 					VirtualTransLink _vtl = new VirtualTransLink();
@@ -178,7 +180,7 @@ public class VTLManager implements ServiceManager{
 					if(priority != VirtualTransLink.VTL_P_LOW)
 						System.out.println("big big mistake");
 					Constraint _con = cons.get(Constraint.VTL_CARRY_C);
-					if(_con !=null && _con.value == VirtualTransLink.ADVANCED_BOD)
+					if(_con !=null && _con.value == VirtualTransLink.VTL_BOD)
 					{
 						_vtl.bod_on = true;
 					}
@@ -191,7 +193,7 @@ public class VTLManager implements ServiceManager{
 						tem_vtll.add(_vtl);
 						return tem_vtll;
 					}
-				}
+				}*/
 			}
 			
 		}
@@ -241,5 +243,4 @@ public class VTLManager implements ServiceManager{
 		
 		return false;
 	}
-
 }
