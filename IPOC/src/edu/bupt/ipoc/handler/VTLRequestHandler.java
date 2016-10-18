@@ -74,27 +74,4 @@ public class VTLRequestHandler{
 
 		return false;
 	}
-	
-/*	public int getBWConstraint(List<Constraint> cons)
-	{
-		int initBW_c = -1;;
-		
-		if(cons != null && cons.size() > 0)
-		{
-			for(Constraint _con : cons)
-			{
-				if(_con.type == Constraint.INITBW_C)
-				{
-					initBW_c = _con.value;
-					break;
-				}
-				
-			}
-		}
-		
-		return initBW_c;
-	}
-	*/
-
-
 }

@@ -109,7 +109,7 @@ public class CentralizedController implements BasicController {
 		// TODO Auto-generated method stub
 		if(ss instanceof PacketService)
 		{
-			PacketService ps = (PacketService) ss;
+			//PacketService ps = (PacketService) ss;
 			if(command == PacketService.CARRIED_REQUEST)
 			{				
 				return vtlm.findFitVTL(cons);
@@ -176,7 +176,7 @@ public class CentralizedController implements BasicController {
 				if(this.handleServiceRequest(_otn, OTNService.BUILD_REQUEST, null))
 				{
 					return _otn;
-				}///////////////////////////////////////////////
+				}
 			}
 			else if(_vtl.vtl_priority == VirtualTransLink.VTL_P_LOW || command == VTLRequestHandler.UseOpticalService )
 			{
@@ -267,15 +267,21 @@ public class CentralizedController implements BasicController {
 			}			
 			else if(command == VirtualTransLink.EXTEND_REQUEST)
 			{
-				//List<Service> ssl = new ArrayList<Service>();
-				for(OTNService onts : _vtl.relevantOTNServices)
+				if(_vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
 				{
-					OpticalService _current_os = onts.osBelongTo;
-					if(_current_os.canOfferEnoughCapacity(_init_bw_c))
+					;//later
+				}
+				else
+				{
+					for(OTNService onts : _vtl.relevantOTNServices)
 					{
-						return setUpOTNServices(_current_os,_init_bw_c);					
+						OpticalService _current_os = onts.osBelongTo;
+						if(_current_os.canOfferEnoughCapacity(_init_bw_c))
+						{
+							return setUpOTNServices(_current_os,_init_bw_c);					
+						}					
 					}					
-				}				
+				}								
 			}			
 		}
 		return null;

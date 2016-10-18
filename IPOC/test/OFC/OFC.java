@@ -21,6 +21,7 @@ import edu.bupt.ipoc.service.ServiceGenerator;
 import edu.bupt.ipoc.service.VirtualTransLink;
 
 public class OFC {
+	
 	public static void main(String[] args){
 		OFC ofc = new OFC();
 		//TestNo_Interactive ti = new TestNo_Interactive();
@@ -28,8 +29,8 @@ public class OFC {
 	
 	public OFC()
 	{
-		String s1 = "Data/OpticalTopology/networkdouble";
-		int packet_num =1000;
+		String s1 = "Data/OpticalTopology/nsfnetWeight";//networkdouble";
+		int packet_num =2000;
 		
 		VariableGraph graph_G = new VariableGraph(s1);
 		ServiceGenerator sg = new ServiceGenerator(graph_G);
@@ -67,8 +68,7 @@ public class OFC {
 			ps.service_flag = PacketService.D_STATIC;
 			ps.parameter = 1.1764;
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
-			consmp.put(Constraint.VTL_CARRY_C, new Constraint(Constraint.VTL_CARRY_C, VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE, "The carried vtl cann't be extended!"));
-			//consmp.put(Constraint.PS_CARRIED_TYPE, new Constraint(Constraint.PS_CARRIED_TYPE, PacketService.STATIC_CARRIED, "The ps carried with static bw!"));
+			consmp.put(Constraint.VTL_CARRY_TYPE_C, new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE, "The carried vtl cann't be extended!"));
 			
 			if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
 			{
@@ -109,15 +109,15 @@ public class OFC {
 			}catch(Exception e)
 			{
 				System.out.println("sdddddddddddddd");
-				/*
-				if(vtl.relevantOTNServices.size()>0)
-				{
-					for(OTNService otn: vtl.relevantOTNServices)
-					{
-						if(otn.osBelongTo == null)
-							System.out.println("The wrong otn id is:"+otn.id);
-					}
-				}*/
+				//
+				//if(vtl.relevantOTNServices.size()>0)
+				//{
+				//	for(OTNService otn: vtl.relevantOTNServices)
+				//	{
+				//		if(otn.osBelongTo == null)
+				//			System.out.println("The wrong otn id is:"+otn.id);
+				//	}
+				//}
 			}
 			
 		}
@@ -145,21 +145,11 @@ public class OFC {
 			}
 			
 		}
-		System.out.println("1:lcy1 is\t"+latency_1/bw_1+"\tlcy2 is\t"+latency_2/bw_2);
+		System.out.println("1:lcy is\t"+(latency_1+latency_2)/(bw_1+bw_2));//+"\tlcy2 is\t"+latency_2/bw_2);
 		
-		/***********************************************************************/
-		graph_G.clear_all_resource();
+		cc.sst.cleanAllConfigurations();
 		
-		cc.psm.clearAllServices();
-		cc.osm.clearAllServices();
-		cc.vtlm.clearAllServices();
-		cc.otnsm.clearAllServices();
-		
-		
-		
-		/************************************************************************/
-		
-		for(int time = 0; time<rolling_time;time++)
+/*		for(int time = 0; time<rolling_time;time++)
 		{
 			
 			
@@ -196,7 +186,9 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+(ps_bw[time]*1.0/occupied_bw));
+
+			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
 					
 			latency_1 = 0.0;
 			latency_2 = 0.0;
@@ -219,24 +211,14 @@ public class OFC {
 					}
 				}
 			}
-			DecimalFormat decimalFormat=new DecimalFormat(".000000");
-			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1)+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2));
+			System.out.println("\tlcy is\t"+decimalFormat.format((latency_1+latency_2)/(bw_1+bw_2)));
+			//System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1)+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2));
 			
 			
 			
-			/***********************************************************************/
-			graph_G.clear_all_resource();
-			
-			cc.psm.clearAllServices();
-			cc.osm.clearAllServices();
-			cc.vtlm.clearAllServices();
-			cc.otnsm.clearAllServices();
-			
-			
-			
-			/************************************************************************/
+			cc.sst.cleanAllConfigurations();
 		}
-		
+*/		
 		
 		//System.out.println();
 		////////////////////////////////////////////////////////////
@@ -275,7 +257,9 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+(ps_bw[time]*1.0/occupied_bw));
+
+			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
 			
 			latency_1 = 0.0;
 			latency_2 = 0.0;
@@ -298,21 +282,11 @@ public class OFC {
 					}
 				}
 			}
-			DecimalFormat decimalFormat=new DecimalFormat(".0000");
-			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1)+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2));
+			//System.out.println("\tlcy is\t"+decimalFormat.format((latency_1+latency_2)/(bw_1+bw_2)/(3*100000)));
+			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));
 			
 			
-			/***********************************************************************/
-			graph_G.clear_all_resource();
-			
-			cc.psm.clearAllServices();
-			cc.osm.clearAllServices();
-			cc.vtlm.clearAllServices();
-			cc.otnsm.clearAllServices();
-			
-			
-			
-			/************************************************************************/
+			cc.sst.cleanAllConfigurations();
 			
 		}
 		
@@ -349,9 +323,7 @@ public class OFC {
 				ps.parameter = 1.0;
 				ps.bucket_count = time;
 				Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
-				consmp.put(Constraint.VTL_CARRY_C, new Constraint(Constraint.VTL_CARRY_C, VirtualTransLink.ADVANCED_BOD, "The ps will be carried with bod!"));
-				//consmp.put(Constraint.PS_CARRIED_TYPE, new Constraint(Constraint.PS_CARRIED_TYPE, PacketService.ADVANCED_BOD, "The ps will be carried with bod!"));
-				
+				consmp.put(Constraint.VTL_CARRY_TYPE_C, new Constraint(Constraint.VTL_CARRY_TYPE_C, PacketService.VTL_BOD, "The ps will be carried with bod!"));
 				
 				if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
 				{
@@ -375,7 +347,8 @@ public class OFC {
 					occupied_bw += OpticalService.BW_10G;
 			}
 			//int carried_ps = 0;
-			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t utilization:\t"+(ps_bw[time]*1.0/occupied_bw));
+			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
+			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
 			
 			latency_1 = 0.0;
 			latency_2 = 0.0;
@@ -397,9 +370,7 @@ public class OFC {
 					}
 				}
 			}
-			DecimalFormat decimalFormat=new DecimalFormat(".0000");
-			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1)+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2));
-			/*
+			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));/*
 			if(time == 239)
 			{
 				for(VirtualTransLink vtt : cc.vtlm.getAllVTLs())
@@ -408,17 +379,7 @@ public class OFC {
 				}
 			}*/
 			
-			/***********************************************************************/
-			graph_G.clear_all_resource();
-			
-			cc.psm.clearAllServices();
-			cc.osm.clearAllServices();
-			cc.vtlm.clearAllServices();
-			cc.otnsm.clearAllServices();
-			
-			
-			
-			/************************************************************************/
+			cc.sst.cleanAllConfigurations();
 		}
 		
 		
