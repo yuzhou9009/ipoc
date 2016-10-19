@@ -129,7 +129,7 @@ public class CentralizedController implements BasicController {
 		
 		if(ss instanceof PacketService)
 		{
-			PacketService ps = (PacketService) ss;
+			//PacketService ps = (PacketService) ss;
 			if(command == PacketService.CARRIED_REQUEST)
 			{
 				return (List) vtlm.findFitVTLs(cons);

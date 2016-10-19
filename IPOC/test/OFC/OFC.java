@@ -24,7 +24,6 @@ public class OFC {
 	
 	public static void main(String[] args){
 		OFC ofc = new OFC();
-		//TestNo_Interactive ti = new TestNo_Interactive();
 	}
 	
 	public OFC()
@@ -37,7 +36,6 @@ public class OFC {
 		List<PacketService> psl = sg.random_PacketServices(packet_num, PacketService.D_TIME_DISTRIBUTION_ONLY,PacketService.INTERACTIVE);
 		
 		CentralizedController cc = new CentralizedController(graph_G);
-		//CentralizedController cc = new CentralizedController(graph_G);
 		
 		int i = 0;
 		int rolling_time =  PacketService.TIME_BUCKET_NUM;
@@ -97,7 +95,6 @@ public class OFC {
 		for(int time = 0; time<rolling_time;time++)
 		{
 			System.out.println(1+time*0.0001+"\t:uti\t"+ps_bw[time]*1.0/occupied_bw);
-			//System.out.println(time+"\t"+_actualBW);
 		}
 
 		
@@ -109,46 +106,12 @@ public class OFC {
 			}catch(Exception e)
 			{
 				System.out.println("sdddddddddddddd");
-				//
-				//if(vtl.relevantOTNServices.size()>0)
-				//{
-				//	for(OTNService otn: vtl.relevantOTNServices)
-				//	{
-				//		if(otn.osBelongTo == null)
-				//			System.out.println("The wrong otn id is:"+otn.id);
-				//	}
-				//}
 			}
 			
 		}
-		
-		double latency_1 = 0.0;
-		double latency_2 = 0.0;
-		int bw_1 = 0;
-		int bw_2 = 0;
-		for(PacketService _pp : psl)
-		{
-			if(_pp.carriedVTL!=null)
-			{
-				_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
-				if(_pp.s_priority == PacketService.SP_HIGH)
-				{
-					if(_pp.carriedVTL!=null)
-						latency_1 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_1 += _pp.getCurrentBw();
-				}
-				else if(_pp.s_priority == PacketService.SP_MID)
-				{
-					latency_2 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-					bw_2 += _pp.getCurrentBw();
-				}
-			}
-			
-		}
-		System.out.println("1:lcy is\t"+(latency_1+latency_2)/(bw_1+bw_2));//+"\tlcy2 is\t"+latency_2/bw_2);
-		
+		cc.sst.getPakcetServiceLatencyStatistics(psl);
 		cc.sst.cleanAllConfigurations();
-		
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 /*		for(int time = 0; time<rolling_time;time++)
 		{
 			
@@ -189,39 +152,12 @@ public class OFC {
 
 			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
 			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
-					
-			latency_1 = 0.0;
-			latency_2 = 0.0;
-			bw_1 = 0;
-			bw_2 = 0;
-			for(PacketService _pp : psl)
-			{
-				if(_pp.carriedVTL!=null)
-				{
-					_pp.service_flag = PacketService.D_TIME_DISTRIBUTION_ONLY;
-					if(_pp.s_priority == PacketService.SP_HIGH)
-					{
-						latency_1 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_1 += _pp.getCurrentBw();
-					}
-					else if(_pp.s_priority == PacketService.SP_MID)
-					{
-						latency_2 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_2 += _pp.getCurrentBw();
-					}
-				}
-			}
-			System.out.println("\tlcy is\t"+decimalFormat.format((latency_1+latency_2)/(bw_1+bw_2)));
-			//System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1)+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2));
 			
-			
-			
+			cc.sst.getPakcetServiceLatencyStatistics(psl);			
 			cc.sst.cleanAllConfigurations();
 		}
 */		
-		
-		//System.out.println();
-		////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
 		for(int time = 0; time<rolling_time;time++)
 		{
@@ -237,7 +173,6 @@ public class OFC {
 				
 				if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
 				{
-				
 					//System.out.print(i+":\tps id:"+ps.id+"\tpriority:"+ps.s_priority+"\tsouce:"+ps.sourceVertex+"\tdest"+ps.sinkVertex+"\tbandwidth:"+ps.getCurrentBw()+"\tcarried VTL id:"+ps.carriedVTL.id+"\t");//+ps.carriedVTL.relevantOTNServices.get(0).osBelongTo.path.toString());
 					//System.out.println("\tstart slot:"+ps.carriedVTL.relevantOpticalServices.get(0).start_slots);
 					//System.out.println();
@@ -256,40 +191,15 @@ public class OFC {
 				else
 					occupied_bw += OpticalService.BW_10G;
 			}
-			//int carried_ps = 0;
 
 			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
 			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
 			
-			latency_1 = 0.0;
-			latency_2 = 0.0;
-			bw_1 = 0;
-			bw_2 = 0;
-			for(PacketService _pp : psl)
-			{
-				if(_pp.carriedVTL!=null)
-				{
-					if(_pp.s_priority == PacketService.SP_HIGH)
-					{
-						
-						latency_1 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_1 += _pp.getCurrentBw();
-					}
-					else if(_pp.s_priority == PacketService.SP_MID)
-					{
-						latency_2 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_2 += _pp.getCurrentBw();
-					}
-				}
-			}
-			//System.out.println("\tlcy is\t"+decimalFormat.format((latency_1+latency_2)/(bw_1+bw_2)/(3*100000)));
-			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));
-			
-			
-			cc.sst.cleanAllConfigurations();
-			
+
+			cc.sst.getPakcetServiceLatencyStatistics(psl);
+			cc.sst.cleanAllConfigurations();		
 		}
-		
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 		//System.out.println();
 		
 		for(int time = 0; time<rolling_time;time++)
@@ -350,39 +260,19 @@ public class OFC {
 			DecimalFormat decimalFormat=new DecimalFormat("0.000000");
 			System.out.print("\tOccupied bw:\t"+occupied_bw+"\t uti:\t"+decimalFormat.format(ps_bw[time]*1.0/occupied_bw));
 			
-			latency_1 = 0.0;
-			latency_2 = 0.0;
-			bw_1 = 0;
-			bw_2 = 0;
-			for(PacketService _pp : psl)
-			{
-				if(_pp.carriedVTL!=null)
-				{
-					if(_pp.s_priority == PacketService.SP_HIGH)
-					{
-						latency_1 += (_pp.carriedVTL.getPathLong()*_pp.getCurrentBw());
-						bw_1 += _pp.getCurrentBw();
-					}
-					else if(_pp.s_priority == PacketService.SP_MID)
-					{
-						latency_2 += (_pp.carriedVTL.getPathLong()*_pp.getCurrentBw());
-						bw_2 += _pp.getCurrentBw();
-					}
-				}
-			}
-			System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));/*
+			cc.sst.getPakcetServiceLatencyStatistics(psl);
+			/*
 			if(time == 239)
 			{
 				for(VirtualTransLink vtt : cc.vtlm.getAllVTLs())
 				{
 					System.out.println(vtt.getUsedBWofVTL()*1.0/vtt.bw_capacity);
 				}
-			}*/
-			
+			}*/			
 			cc.sst.cleanAllConfigurations();
 		}
 		
-		
+///////////////////////////////////////////////////////////////////////////////////////////////////		
 		//int ps_used_bw = 0;
 		
 		
