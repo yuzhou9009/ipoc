@@ -10,6 +10,7 @@ public class Constraint {
 	
 	public static final int INITBW_C = 4;//request inital bandwidth
 	
+	public static final int PACKET_SERVICE_CARRIED_TYPE_C = 5;
 	public static final int VTL_CARRY_TYPE_C = 7;
 	
 	public static final int FENJI_C = 8;	

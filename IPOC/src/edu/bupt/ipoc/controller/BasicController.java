@@ -9,7 +9,7 @@ import java.util.Map;
 import edu.bupt.ipoc.constraint.*;
 
 public interface BasicController {
-	
+		
 	public boolean handleServiceRequest(Service ss, int command, Map<Integer,Constraint> cons);
 	public Service findExistOneToFitRequest(Service ss, int command, Map<Integer,Constraint> cons);
 	public List<Service> findExistOnesToFitRequest(Service ss, int command, Map<Integer,Constraint> cons);

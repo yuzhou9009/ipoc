@@ -27,7 +27,7 @@ import edu.bupt.ipoc.tools.SimpleStatisticTool;
 public class CentralizedController implements BasicController {
 
 	private VariableGraph graph_G = null;
-
+	
 	public PacketServiceManager psm = null;
 	public VTLManager vtlm = null;
 	public OpticalServiceManager osm = null;
@@ -39,7 +39,7 @@ public class CentralizedController implements BasicController {
 	public OTNRequestHandler otnrh = null;
 	
 	public SimpleStatisticTool sst = null;
-	
+		
 	public CentralizedController(VariableGraph _graph_G)
 	{
 		this.graph_G = _graph_G;
@@ -64,7 +64,7 @@ public class CentralizedController implements BasicController {
 			if(psrh.handlerRequest(_ps, command, cons))
 			{
 				if(command == PacketService.CARRIED_REQUEST)
-					this.saveService(_ps);
+					psm.addService(_ps);
 				return true;
 			}
 			else
@@ -76,7 +76,7 @@ public class CentralizedController implements BasicController {
 			if(orrh.handlerRequest(_os, command, cons))
 			{
 				if(command == OpticalService.BUILD_REQUEST)
-					this.saveService(_os);
+					osm.addService(_os);
 				return true;
 			}
 		}
@@ -86,7 +86,7 @@ public class CentralizedController implements BasicController {
 			if(vtlrh.handlerRequest(_vtl, command, cons))
 			{
 				if(command == VirtualTransLink.BUILD_REQUEST)
-					this.saveService(_vtl);
+					vtlm.addService(_vtl);
 				return true;
 			}
 		}
@@ -96,22 +96,20 @@ public class CentralizedController implements BasicController {
 			if(otnrh.handlerRequest(_otns, command, cons))
 			{
 				if(command == OTNService.BUILD_REQUEST)
-					this.saveService(_otns);
+					otnsm.addService(_otns);
 				return true;
 			}
 		}
 		return false;
 	}
 	
-
 	@Override
 	public Service findExistOneToFitRequest(Service ss, int command, Map<Integer,Constraint> cons) {
 		// TODO Auto-generated method stub
 		if(ss instanceof PacketService)
 		{
-			//PacketService ps = (PacketService) ss;
 			if(command == PacketService.CARRIED_REQUEST)
-			{				
+			{	
 				return vtlm.findFitVTL(cons);
 			}
 		}
@@ -143,7 +141,6 @@ public class CentralizedController implements BasicController {
 
 	@Override
 	public Service establishNewOneToFitRequest(Service ss, int command, Map<Integer,Constraint> cons) {
-		// TODO Auto-generated method stub
 		
 		if(ss instanceof PacketService)
 		{
@@ -151,14 +148,10 @@ public class CentralizedController implements BasicController {
 			
 			VirtualTransLink _vtl = new VirtualTransLink();
 			_vtl.setID(ServiceGenerator.generate_an_id());
-			_vtl.setSourceAndDest(ps.sourceVertex, ps.sinkVertex);
-			_vtl.setPrioriy(ps.s_priority);
+			_vtl.setSourceAndDest(ps.sourceNode, ps.destNode);
+			_vtl.setPrioriy(ps.priority);
 			
-			Constraint _con_tem = cons.get(Constraint.VTL_CARRY_TYPE_C);
-			if(_con_tem !=null && _con_tem.value == PacketService.VTL_BOD)
-			{
-				_vtl.bod_on = true;
-			}
+			_vtl.setTypeAccordingToConstraints(cons);
 		
 			if(this.handleServiceRequest(_vtl, VirtualTransLink.BUILD_REQUEST, cons))
 			{
@@ -169,7 +162,7 @@ public class CentralizedController implements BasicController {
 		{
 			VirtualTransLink _vtl = (VirtualTransLink) ss;
 			
-			if((_vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH || _vtl.vtl_priority == VirtualTransLink.VTL_P_MID) && command != VTLRequestHandler.UseOpticalService )
+			if((_vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || _vtl.vtl_priority == VirtualTransLink.PRIORITY_MID) && command != VTLRequestHandler.UseOpticalService )
 			{
 				OTNService _otn = new OTNService(ServiceGenerator.generate_an_id(),_vtl.sourceVertex, _vtl.destVertex);
 				
@@ -178,7 +171,7 @@ public class CentralizedController implements BasicController {
 					return _otn;
 				}
 			}
-			else if(_vtl.vtl_priority == VirtualTransLink.VTL_P_LOW || command == VTLRequestHandler.UseOpticalService )
+			else if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW || command == VTLRequestHandler.UseOpticalService )
 			{
 				OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
 						_vtl.sourceVertex, _vtl.destVertex, 1, 0);
@@ -221,14 +214,18 @@ public class CentralizedController implements BasicController {
 			
 			VirtualTransLink _vtl = (VirtualTransLink) ss;
 			
-			if(_vtl.bod_on == true)
+			if(_vtl.type == VirtualTransLink.CAN_NOT_BE_EXTENDED_BUT_SHARED || _vtl.type == VirtualTransLink.CAN_NOT_BE_EXTENDED_OR_SHARED)
 			{
-				if(_vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH)
+				_init_bw_c = (int)(_init_bw_c * Service.SURVIVABILITY_FACTOR)+1;
+			}
+			else if(_vtl.type == VirtualTransLink.VTL_BOD)//This request with low priority will not be here
+			{
+				if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH)
 					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_high)+1;
-				else if(_vtl.vtl_priority == VirtualTransLink.VTL_P_MID)
+				else if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
 					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_mid)+1;
 			}
-			
+
 			if(command == VirtualTransLink.BUILD_REQUEST)
 			{
 				if(_init_bw_c <= OTNService.BW_1G)
@@ -241,8 +238,9 @@ public class CentralizedController implements BasicController {
 						return ssl;
 					}				
 				}
-				else if(OTNService.BW_1G <_init_bw_c && _init_bw_c<= (OpticalService.SUB_OTN_NUM * OTNService.BW_1G))
+				else if(OTNService.BW_1G <_init_bw_c && _init_bw_c <= (OpticalService.SUB_OTN_NUM * OTNService.BW_1G))
 				{
+					//need to be extended, we should use all otns which have the same path, not limited the same os.
 					OpticalService _os = osm.findFitOs(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
 					if(_os != null)
 					{
@@ -267,7 +265,7 @@ public class CentralizedController implements BasicController {
 			}			
 			else if(command == VirtualTransLink.EXTEND_REQUEST)
 			{
-				if(_vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
+				if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW)
 				{
 					;//later
 				}
@@ -355,7 +353,7 @@ public class CentralizedController implements BasicController {
 										
 					int _all_bw = ps.getCurrentBw();
 					int _bw = 0;
-					ps.pscs = new ArrayList<PacketServiceChild>();
+					ps.sub_packet_services = new ArrayList<PacketServiceChild>();
 					for(VirtualTransLink vtl : vtls)
 					{
 						_bw = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
@@ -367,18 +365,18 @@ public class CentralizedController implements BasicController {
 						if(_bw <= PacketService.STATIC_MIN_RATE)
 						{
 							psc = new PacketServiceChild(ServiceGenerator.generate_an_id(),
-									ps.sourceVertex,ps.sinkVertex,ps.s_priority,PacketService.STATIC_MIN_RATE,0);
-							psc.static_bw = _bw;
+									ps.sourceNode,ps.destNode,ps.priority,PacketService.STATIC_MIN_RATE,0);
+
 							//_bw = PacketService.STATIC_MIN_RATE;
 						}
 						else
 						{
 							psc = new PacketServiceChild(ServiceGenerator.generate_an_id(),
-									ps.sourceVertex,ps.sinkVertex,ps.s_priority,_bw,0);
+									ps.sourceNode,ps.destNode,ps.priority,_bw,0);
 						}
 								
 						_all_bw -= _bw;
-						ps.pscs.add(psc);
+						ps.sub_packet_services.add(psc);
 						mappingServices(psc, vtl, null);							
 					}
 					if(_all_bw>0)
@@ -398,19 +396,19 @@ public class CentralizedController implements BasicController {
 		
 		if(ss instanceof PacketService)
 		{
-			psm.addService(ss);
+			psm.addService((PacketService)ss);
 		}
 		else if(ss instanceof OpticalService)
 		{
-			osm.addService(ss);
+			osm.addService((OpticalService)ss);
 		}
 		else if(ss instanceof VirtualTransLink)
 		{
-			vtlm.addService(ss);
+			vtlm.addService((VirtualTransLink)ss);
 		}
 		else if(ss instanceof OTNService)
 		{
-			otnsm.addService(ss);
+			otnsm.addService((OTNService)ss);
 		}
 		
 	}

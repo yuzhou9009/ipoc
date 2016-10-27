@@ -35,7 +35,7 @@ public class VTLRequestHandler{
 				return false;
 			}
 			
-			if(vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH || vtl.vtl_priority == VirtualTransLink.VTL_P_MID)
+			if(vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
 			{
 				List<Service> _tems = bc.establishNewOnesToFitRequest(vtl, VirtualTransLink.BUILD_REQUEST, cons);
 				
@@ -48,7 +48,7 @@ public class VTLRequestHandler{
 					return true;
 				}				
 			}
-			else if(vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
+			else if(vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW)
 			{
 				Service _tem = bc.establishNewOneToFitRequest(vtl, UseOpticalService, cons);
 				 if(_tem != null)

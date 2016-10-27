@@ -11,7 +11,7 @@ import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.Service;
 import edu.bupt.ipoc.service.VirtualTransLink;
 
-public class OpticalServiceManager implements ServiceManager{
+public class OpticalServiceManager{
 	
 	protected Map<Pair<Integer, Integer>, List<OpticalService>> vertex_pair_os_map = null;
 	
@@ -24,9 +24,8 @@ public class OpticalServiceManager implements ServiceManager{
 				new HashMap<Pair<Integer,Integer>, List<OpticalService>>();
 	}
 
-	@Override
-	public boolean addService(Service ss) {
-		OpticalService os = (OpticalService)ss;
+	public boolean addService(OpticalService os) 
+	{
 		Pair<Integer,Integer> sd = new Pair<Integer,Integer>(os.sourceVertex,os.sinkVertex);
 		
 		if(vertex_pair_os_map.get(sd) == null)
@@ -41,8 +40,7 @@ public class OpticalServiceManager implements ServiceManager{
 		return false;
 	}
 
-	@Override
-	public boolean deleteService(Service ss) {
+	public boolean deleteService(OpticalService os) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -66,7 +64,6 @@ public class OpticalServiceManager implements ServiceManager{
 		return null;
 	}
 
-	@Override
 	public boolean clearAllServices() {
 		vertex_pair_os_map.clear();
 		return false;

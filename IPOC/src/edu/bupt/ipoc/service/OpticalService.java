@@ -12,11 +12,6 @@ public class OpticalService extends Service {
 	public static final int BUILD_REQUEST = 1;
 	public static final int DELETE_RELEASE = 2;
 	
-	public static final int BW_1G = 1000;
-	public static final int BW_10G = 10000;
-	public static final int BW_40G = 40000;
-	public static final int BW_100G = 100000;
-	
 	//rate默认为1，wdm为1，弹性光网络为其它 single_slot也表示是WDM
 	public static final int SINGLE_SLOT = 1;
 

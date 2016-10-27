@@ -11,7 +11,7 @@ import edu.bupt.ipoc.service.OTNService;
 import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.Service;
 
-public class OTNServiceManager implements ServiceManager{
+public class OTNServiceManager{
 	
 
 	
@@ -26,9 +26,8 @@ public class OTNServiceManager implements ServiceManager{
 				new HashMap<Pair<Integer,Integer>, List<OTNService>>();
 	}
 
-	@Override
-	public boolean addService(Service ss) {
-		OTNService otns = (OTNService)ss;
+	public boolean addService(OTNService otns) 
+	{
 		Pair<Integer,Integer> sd = new Pair<Integer,Integer>(otns.sourceVertex,otns.destVertex);
 		
 		if(vertex_pair_otns_map.get(sd) == null)
@@ -43,13 +42,11 @@ public class OTNServiceManager implements ServiceManager{
 		return false;
 	}
 
-	@Override
-	public boolean deleteService(Service ss) {
+	public boolean deleteService(OTNService otns) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean clearAllServices() {
 		vertex_pair_otns_map.clear();
 		return false;

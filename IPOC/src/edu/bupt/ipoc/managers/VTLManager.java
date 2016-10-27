@@ -12,7 +12,7 @@ import edu.bupt.ipoc.service.Service;
 import edu.bupt.ipoc.service.ServiceGenerator;
 import edu.bupt.ipoc.service.VirtualTransLink;
 
-public class VTLManager implements ServiceManager{
+public class VTLManager{
 	
 	protected Map<Pair<Integer, Integer>, List<VirtualTransLink>> vertex_pair_vtl_map = null;
 	
@@ -36,7 +36,7 @@ public class VTLManager implements ServiceManager{
 				for(VirtualTransLink vtl : vtll)
 				{					
 					_con_tem = cons.get(Constraint.VTL_CARRY_TYPE_C);
-					if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTEND_BUT_SHARE)
+					if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTENDED_BUT_SHARED)
 					{
 						if(vtl.vtl_priority != cons.get(Constraint.PRIORITY_C).value)
 							continue;
@@ -44,7 +44,11 @@ public class VTLManager implements ServiceManager{
 						if(vtl.canOfferMoreBW(_con_tem.value))
 							return vtl;
 					}
-					else
+					else if(_con_tem !=null && _con_tem.value == VirtualTransLink.CAN_NOT_BE_EXTENDED_OR_SHARED)
+					{
+						continue;
+					}
+					else if(_con_tem !=null && _con_tem.value == VirtualTransLink.VTL_BOD)
 					{
 						if(vtl.vtl_priority != cons.get(Constraint.PRIORITY_C).value)
 							continue;
@@ -65,6 +69,7 @@ public class VTLManager implements ServiceManager{
 					}					
 					//System.out.println("vtl source:"+vtl.sourceVertex+"\tdest"+vtl.destVertex+"\tprioiry:"+vtl.vtl_priority);					
 				}
+				//to be extended, if did not find any for vtl_bod mode, we would check if any vtl 
 			}
 			else
 				return null;
@@ -74,7 +79,7 @@ public class VTLManager implements ServiceManager{
 	
 	public List<VirtualTransLink> findFitVTLs(Map<Integer, Constraint> cons) {
 		
-		if(ensureHaveAllNeededConstraints(cons) && cons.get(Constraint.PRIORITY_C).value == VirtualTransLink.VTL_P_LOW)//sure
+		if(ensureHaveAllNeededConstraints(cons) && cons.get(Constraint.PRIORITY_C).value == VirtualTransLink.PRIORITY_LOW)//sure
 		{
 			List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer, Integer>(cons.get(Constraint.SOURCE_C).value,cons.get(Constraint.DEST_C).value));
 			if(vtll != null && !vtll.isEmpty())
@@ -84,7 +89,7 @@ public class VTLManager implements ServiceManager{
 				int canOfferBW = 0;
 				for(VirtualTransLink vtl : vtll)
 				{
-					if(vtl.vtl_priority == VirtualTransLink.VTL_P_HIGH || vtl.vtl_priority == VirtualTransLink.VTL_P_MID)
+					if(vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
 					{
 						canOfferBW = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
 						if(canOfferBW > 0)
@@ -106,7 +111,7 @@ public class VTLManager implements ServiceManager{
 				{
 					for(VirtualTransLink vtl : vtll)//there need to be modified, the low flow should can be carried in different VTL_OS
 					{
-						if(vtl.vtl_priority == VirtualTransLink.VTL_P_LOW)
+						if(vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW)
 						{
 							if(vtl.canOfferMoreBW(allRequestBW))
 							{
@@ -132,10 +137,24 @@ public class VTLManager implements ServiceManager{
 		
 		return vtls;
 	}
+	
+	public void showAllVirtualTransLink()
+	{
+		List<VirtualTransLink> _vtls = getAllVTLs();
+		System.out.println("There are "+_vtls.size()+" vtls");
+		for(VirtualTransLink _vtl : _vtls)
+		{
+			_vtl.showMyself();
+		}
+	}
+	
+	public Map<Pair<Integer, Integer>, List<VirtualTransLink>> getVTLMAP()
+	{
+		return this.vertex_pair_vtl_map;
+	}
 
-	@Override
-	public boolean addService(Service ss) {
-		VirtualTransLink vtl = (VirtualTransLink)ss;
+	public boolean addService(VirtualTransLink vtl) 
+	{
 		Pair<Integer,Integer> sd = new Pair<Integer,Integer>(vtl.sourceVertex,vtl.destVertex);
 		
 		if(vertex_pair_vtl_map.get(sd) == null)
@@ -150,13 +169,11 @@ public class VTLManager implements ServiceManager{
 		return false;
 	}
 
-	@Override
-	public boolean deleteService(Service ss) {
+	public boolean deleteService(VirtualTransLink vtl) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public boolean clearAllServices() {
 		// TODO Auto-generated method stub
 		

@@ -51,22 +51,19 @@ public class SimpleStatisticTool implements Tool {
 		{
 			if(_pp.carriedVTL!=null)
 			{
-				if(_pp.s_priority == PacketService.SP_HIGH)
+				if(_pp.priority == PacketService.PRIORITY_HIGH)
 				{
 					if(_pp.carriedVTL!=null)
 						latency_1 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
 						bw_1 += _pp.getCurrentBw();
 				}
-				else if(_pp.s_priority == PacketService.SP_MID)
+				else if(_pp.priority == PacketService.PRIORITY_MID)
 				{
 					latency_2 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
 					bw_2 += _pp.getCurrentBw();
 				}
-			}
-			
+			}			
 		}
-		System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));
-		
-	}
-	
+		System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));		
+	}	
 }
