@@ -81,6 +81,9 @@ public class VTLManager{
 		
 		if(ensureHaveAllNeededConstraints(cons) && cons.get(Constraint.PRIORITY_C).value == VirtualTransLink.PRIORITY_LOW)//sure
 		{
+			if(cons.get(Constraint.VTL_CARRY_TYPE_C).value != VirtualTransLink.VTL_BOD)
+				return null;
+			
 			List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer, Integer>(cons.get(Constraint.SOURCE_C).value,cons.get(Constraint.DEST_C).value));
 			if(vtll != null && !vtll.isEmpty())
 			{	
@@ -89,7 +92,7 @@ public class VTLManager{
 				int canOfferBW = 0;
 				for(VirtualTransLink vtl : vtll)
 				{
-					if(vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
+					if((vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || vtl.vtl_priority == VirtualTransLink.PRIORITY_MID) && vtl.type == VirtualTransLink.VTL_BOD)
 					{
 						canOfferBW = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
 						if(canOfferBW > 0)

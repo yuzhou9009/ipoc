@@ -37,14 +37,13 @@ public class PacketServiceRequestHandler{
 			
 			if(ps.priority == PacketService.PRIORITY_LOW && _con.value == PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE)
 			{
-				;
-				/*List<Service> _tems = null;
+				List<Service> _tems = null;
 				_tems = bc.findExistOnesToFitRequest(ps,command, cons);
 				if(_tems != null && _tems.size()>0)
 				{
 					bc.mappingServices(ps, _tems, cons);
 					return true;					
-				}*/
+				}
 			}
 			else
 			{

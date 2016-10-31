@@ -203,7 +203,6 @@ public class VirtualTransLink extends Service{
 	{
 		if(this.type == VirtualTransLink.VTL_BOD)
 		{
-			double _tem_high_threadHold = -0.0;
 			return (int)(getCapacity() * getCurrentHighThresholdValue()) - getUsedBWofVTL();
 		}
 		else if (this.type == VirtualTransLink.CAN_NOT_BE_EXTENDED_OR_SHARED || this.type == VirtualTransLink.CAN_NOT_BE_EXTENDED_BUT_SHARED)
@@ -213,22 +212,35 @@ public class VirtualTransLink extends Service{
 		return (int)(getCapacity() * REGULAR_UPPER_THRESHOLD) - getUsedBWofVTL();
 	}
 	
-	/*	public int getAcutallyRestBWforShare()
+	public int getAcutallyRestBWforShare()
 	{
-		if(vtl_priority == PRIORITY_LOW)
-			return getAcutallyRestBW();
-		return (getAcutallyRestBW()/MIN_SHARED_BW_GRANULARITY)*MIN_SHARED_BW_GRANULARITY;
+		//The priority of vtl should not be low, and the type of vtl should be VTL_BOD 
+		//if(vtl_priority == PRIORITY_LOW || type != VTL_BOD)
+		//{
+		//	System.out.println("It should never be here!!");
+		//	return 0;
+		//}
+		//int _tem  = ((int)(getCapacity() * th_usp_low - getUsedBWofVTL())/MIN_SHARED_BW_GRANULARITY)*MIN_SHARED_BW_GRANULARITY;
+		//System.out.println("orginal:"+(int)(getCapacity() * th_usp_low - getUsedBWofVTL())+"_tem"+_tem);
+		if(this.vtl_priority != Service.PRIORITY_LOW)
+			return (((int)(getCapacity() * th_usp_low) - getUsedBWofVTL())/MIN_SHARED_BW_GRANULARITY)*MIN_SHARED_BW_GRANULARITY;
+		else
+			return (int)(getCapacity() * th_usp_low) - getUsedBWofVTL();
 	}
 	
-	public int getAcutallyRestBW()
+	public int getAcutallyRestBWforShareNoLimit()
 	{
-		return (int)(getMaxBWCanCarried() * th_usp_low) - getUsedBWofVTL();
+		//The priority of vtl should not be low, and the type of vtl should be VTL_BOD 
+		//if(vtl_priority == PRIORITY_LOW || type != VTL_BOD)
+		//{
+		//	System.out.println("It should never be here!!");
+		//	return 0;
+		//}
+		//int _tem  = ((int)(getCapacity() * th_usp_low - getUsedBWofVTL())/MIN_SHARED_BW_GRANULARITY)*MIN_SHARED_BW_GRANULARITY;
+		//System.out.println("orginal:"+(int)(getCapacity() * th_usp_low - getUsedBWofVTL())+"_tem"+_tem);
+		return ((int)(getCapacity() * th_usp_low) - getUsedBWofVTL());
 	}
-*/	
-//	public int getMaxBWCanCarried()
-//	{
-//		return this.bw_capacity;
-//	}
+
 	public int getCapacity()
 	{
 		return this.bw_capacity;
@@ -300,7 +312,7 @@ public class VirtualTransLink extends Service{
 			for(PacketService _ps : carriedPacketServices)
 			{
 				if(_ps.priority == this.vtl_priority)
-					usedBW += _ps.getCurrentBw();
+					usedBW += _ps.getCurrentOccupiedBw();
 			}
 			return usedBW;
 		}
@@ -388,6 +400,8 @@ public class VirtualTransLink extends Service{
 		for(PacketService _ps : carriedPacketServices)
 		{
 			describtion += "\n\t\t ps id:"+_ps.id+"\t the request bw is:"+_ps.getCurrentOccupiedBw();
+			if(_ps instanceof PacketServiceChild)
+				describtion += "\t it is a ps child, his father id:"+((PacketServiceChild)_ps).ps_father.id;
 			request_bw += _ps.getCurrentOccupiedBw();
 		}
 		describtion += "\n\t\t all ps request bw is :"+request_bw;

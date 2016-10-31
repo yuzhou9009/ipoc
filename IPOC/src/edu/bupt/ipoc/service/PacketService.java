@@ -113,7 +113,7 @@ public class PacketService extends Service{
 			return getCurrentBw();
 	}
 	
-	public int getCurrentBw()
+	private int getCurrentBw()
 	{
 		return real_time_bw_buckets[current_bucket_count];
 	

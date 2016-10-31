@@ -2,6 +2,7 @@ package edu.bupt.ipoc.tools;
 
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.PacketService;
+import edu.bupt.ipoc.service.VirtualTransLink;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -54,16 +55,27 @@ public class SimpleStatisticTool implements Tool {
 				if(_pp.priority == PacketService.PRIORITY_HIGH)
 				{
 					if(_pp.carriedVTL!=null)
-						latency_1 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-						bw_1 += _pp.getCurrentBw();
+						latency_1 += (_pp.getCurrentOccupiedBw()*_pp.carriedVTL.getPathLong());
+						bw_1 += _pp.getCurrentOccupiedBw();
 				}
 				else if(_pp.priority == PacketService.PRIORITY_MID)
 				{
-					latency_2 += (_pp.getCurrentBw()*_pp.carriedVTL.getPathLong());
-					bw_2 += _pp.getCurrentBw();
+					latency_2 += (_pp.getCurrentOccupiedBw()*_pp.carriedVTL.getPathLong());
+					bw_2 += _pp.getCurrentOccupiedBw();
 				}
 			}			
 		}
 		System.out.println("\tlcy1 is\t"+decimalFormat.format(latency_1/bw_1/(3*100000))+"\tlcy2 is\t"+decimalFormat.format(latency_2/bw_2/(3*100000)));		
-	}	
+	}
+	
+	public int showOccupiedBwStatisticsOfAllVTLS(List<VirtualTransLink> vtls)
+	{
+		int _bw_all = 0;
+		
+		for(VirtualTransLink vtl : vtls)
+			_bw_all += vtl.getCapacity();
+		System.out.println("Total occupied bw is :"+_bw_all);
+		
+		return _bw_all;		
+	}
 }

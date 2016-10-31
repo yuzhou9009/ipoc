@@ -127,7 +127,6 @@ public class CentralizedController implements BasicController {
 		
 		if(ss instanceof PacketService)
 		{
-			//PacketService ps = (PacketService) ss;
 			if(command == PacketService.CARRIED_REQUEST)
 			{
 				return (List) vtlm.findFitVTLs(cons);
@@ -341,17 +340,28 @@ public class CentralizedController implements BasicController {
 				{
 					{
 						//test
-						int _arbw = ps.getCurrentBw();
+						int _arbw = ps.getCurrentOccupiedBw();
 						int bww = 0;
 						for(VirtualTransLink vsss : vtls)
 						{
 							bww += vsss.getAcutallyRestBWforShare();//getAcutallyRestBW();
 						}
 						if(bww<_arbw)
-							System.out.println("big problem£¬the different value is"+ (bww-_arbw));
+						{
+							System.out.println("**************big problem£¬the different value is"+ (bww-_arbw));
+							
+							int _total_need_bw = ps.getCurrentOccupiedBw();
+							System.out.println("Total need bw is"+_total_need_bw);
+							for(VirtualTransLink vsss : vtls)
+							{
+								System.out.println("the type of vsss is:"+vsss.vtl_priority+"\tthis can offer bw:"+vsss.getAcutallyRestBWforShare()+"this not limited is :"+vsss.getAcutallyRestBWforShareNoLimit());//getAcutallyRestBW();
+							}
+							
+							
+						}
 					}					
 										
-					int _all_bw = ps.getCurrentBw();
+					int _all_bw = ps.getCurrentOccupiedBw();
 					int _bw = 0;
 					ps.sub_packet_services = new ArrayList<PacketServiceChild>();
 					for(VirtualTransLink vtl : vtls)
@@ -374,7 +384,8 @@ public class CentralizedController implements BasicController {
 							psc = new PacketServiceChild(ServiceGenerator.generate_an_id(),
 									ps.sourceNode,ps.destNode,ps.priority,_bw,0);
 						}
-								
+						
+						psc.setPsFather(ps);
 						_all_bw -= _bw;
 						ps.sub_packet_services.add(psc);
 						mappingServices(psc, vtl, null);							

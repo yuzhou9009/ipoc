@@ -21,8 +21,8 @@ public class IPOC {
 	
 	public IPOC()
 	{
-		topology = "Data/OpticalTopology/3Point";//nsfnetWeight";//networkdouble";
-		packet_num =50;
+		topology = "Data/OpticalTopology/nsfnetWeight";//networkdouble";
+		packet_num = 3000;
 		graph_G = new VariableGraph(topology);
 		sg = new ServiceGenerator(graph_G);
 		psl = sg.random_PacketServices(packet_num, ServiceGenerator.SERVICE_WITH_RANDOM_BW,ServiceGenerator.PERMENENT_SERVICE);
@@ -34,7 +34,7 @@ public class IPOC {
 		IPOC ipoc = new IPOC();
 		//ipoc.showAllPacketServicesState();
 		
-		ipoc.staticlyCarryingPacketServices();
+		//ipoc.staticlyCarryingPacketServices();
 		ipoc.carryingIndivisiblePacketServicesWithVTLBOD();
 		
 	}
@@ -54,7 +54,7 @@ public class IPOC {
 		{
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
-					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.STATIC_CARRIED, "The ps will be carried in a satatic way!"));
+					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_INDIVISIBLE, "The ps will be carried in a satatic way!"));
 			consmp.put(Constraint.VTL_CARRY_TYPE_C, 
 					new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.CAN_NOT_BE_EXTENDED_BUT_SHARED, "The vtl can not be extended but shared!"));
 			
@@ -64,7 +64,8 @@ public class IPOC {
 			}			
 		}
 		System.out.println("StaticlyCarrying: successed ps "+ tatal_successed_ps);
-		cc.vtlm.showAllVirtualTransLink();
+		//cc.vtlm.showAllVirtualTransLink();
+		cc.sst.showOccupiedBwStatisticsOfAllVTLS(cc.vtlm.getAllVTLs());
 		cc.sst.getPakcetServiceLatencyStatistics(psl);
 		cc.sst.cleanAllConfigurations();
 	}
@@ -77,16 +78,17 @@ public class IPOC {
 		{
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
-					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_INDIVISIBLE, "The ps will be carried with vtl-bod!"));
+					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE, "The ps will be carried with vtl-bod!"));
 			consmp.put(Constraint.VTL_CARRY_TYPE_C, 
-					new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.VTL_BOD, "The vtl can not be extended but shared!"));
+					new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.VTL_BOD, "The vtl can be extended and shared!"));
 			if(cc.handleServiceRequest(ps, PacketService.CARRIED_REQUEST, consmp))
 			{
 				tatal_successed_ps++;
 			}			
 		}
 		System.out.println("StaticlyCarrying: successed ps "+ tatal_successed_ps);
-		cc.vtlm.showAllVirtualTransLink();
+		//cc.vtlm.showAllVirtualTransLink();
+		cc.sst.showOccupiedBwStatisticsOfAllVTLS(cc.vtlm.getAllVTLs());
 		cc.sst.getPakcetServiceLatencyStatistics(psl);
 		cc.sst.cleanAllConfigurations();
 	}
