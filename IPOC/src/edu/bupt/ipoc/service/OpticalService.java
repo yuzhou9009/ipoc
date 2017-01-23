@@ -37,6 +37,7 @@ public class OpticalService extends Service {
 	public static final int STATE_FREE = 0;
 	public static final int STATE_USING_BUT_VACANT = 1;
 	public static final int STATE_USING_NOT_VACANT = 2;
+	public static final int ESTABLISHING = 3;
 
 	
 	
@@ -123,10 +124,23 @@ public class OpticalService extends Service {
 		{
 			int _rest_capacity = (SUB_1G_NUM - otn_children.size()) * BW_1G;
 			if(_rest_capacity >= _requestBW)
-				return true;			
+				return true;
+			else
+				return false;
 		}
 		else
 			System.out.println("This optical service can not be used to offer sub otn, just check!");
 		return false;
+	}
+	
+	public int getNumberofFreeOTNs()
+	{
+		if(this.type == CHANNEL_10G_FOT_OTN)
+		{
+			return SUB_1G_NUM - otn_children.size();
+		}
+		else
+			System.out.println("This optical service can not be used to offer sub otn, just check!!");
+		return 0;
 	}
 }

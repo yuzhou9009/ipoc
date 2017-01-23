@@ -10,8 +10,6 @@ import edu.bupt.ipoc.service.VirtualTransLink;
 
 public class VTLRequestHandler{
 	
-	public static final int UseOpticalService = 11;
-	
 	BasicController bc;
 	
 	public VTLRequestHandler(BasicController _bc)
@@ -50,16 +48,39 @@ public class VTLRequestHandler{
 			}
 			else if(vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW)
 			{
-				Service _tem = bc.establishNewOneToFitRequest(vtl, UseOpticalService, cons);
-				 if(_tem != null)
+				Service _tem = bc.establishNewOneToFitRequest(vtl, Service.UseOpticalService, cons);
+				if(_tem != null)
 				{
 					bc.mappingServices(vtl, _tem, null);
 					return true;
 				}
+				else
+				{
+					_tem = bc.establishNewOneToFitRequest(vtl, Service.UseOTNService, cons);
+					if(_tem != null)
+					{
+						bc.mappingServices(vtl, _tem, null);
+						//TODO
+						return true;
+					}
+				}
+				
 			}
 		}
 		else if(command == VirtualTransLink.EXTEND_REQUEST)
 		{
+			if(vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW && cons == null)
+			{
+				//extend a 10G tunnel.
+				Service _tem = bc.establishNewOneToFitRequest(vtl, Service.UseOpticalService, cons);
+				if(_tem != null)
+				{
+					bc.mappingServices(vtl, _tem, null);
+					return true;
+				}
+				else
+					return false;
+			}
 			List<Service> _tems = bc.establishNewOnesToFitRequest(vtl, VirtualTransLink.EXTEND_REQUEST, cons);
 			
 			if(_tems !=null && _tems.size() > 0)
@@ -70,6 +91,25 @@ public class VTLRequestHandler{
 				}
 				return true;
 			}
+		}
+		else if(command == VirtualTransLink.SHRINKED_REQUEST)
+		{
+			List<Service> _tems = vtl.servicesNeededToRemove();
+			bc.unmappingServices(vtl,_tems,null);
+			return true;
+		}
+		else if(command == VirtualTransLink.ADJUST_PSS_REQUEST)
+		{
+			//TODO have no idea yet
+			//Calculate the bw need to be removed
+			//find the sub-service with min bw.
+			//sort the sub-services of the father service.
+			//find a vtl most avaible.
+			//move the sub-service to that one.
+			//combine the two-services.
+			//check if it is fine now.
+			
+			
 		}
 
 		return false;

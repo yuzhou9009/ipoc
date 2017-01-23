@@ -43,7 +43,7 @@ public class ServiceGenerator {
 		graph_G = _graph_G;
 	}
 	
-	public PacketService create_PacketService(int _static_bw){
+/*	public PacketService create_PacketService(int _static_bw){
 		
 		int a,b,tem,_priority;
 
@@ -96,14 +96,14 @@ public class ServiceGenerator {
 			_priority = 3;
 		
 		return new PacketService(generate_an_id(),_sourceVertex,_sinkVertex,_priority, _static_bw,0);
-	}
+	}*/
 	
-	public List<PacketService> random_PacketServices(int packetService_num, int bw_type, int last_time_type)
+	public List<BestEffortPacketService> random_BestEffortPacketServices(int packetService_num, int bw_type)
 	{
-		List<PacketService> ps_list = new ArrayList<PacketService>();
+		List<BestEffortPacketService> beps_list = new ArrayList<BestEffortPacketService>();
 		
 		int _souce_node, _dest_node, _priority, tem;
-		PacketService ps_tem = null;
+		BestEffortPacketService ps_tem = null;
 		for(int i = 0; i<packetService_num; i++)
 		{
 			_souce_node = java.util.concurrent.ThreadLocalRandom.current().nextInt(graph_G.get_vertex_num());
@@ -120,15 +120,59 @@ public class ServiceGenerator {
 				_dest_node= tem;
 			}
 			
-			_priority = generatePriority();
-			if(ServiceGenerator.SERVICE_WITH_RANDOM_BW == bw_type && ServiceGenerator.PERMENENT_SERVICE == last_time_type)
-				ps_tem = new PacketService(generate_an_id(),_souce_node,_dest_node,_priority,PacketService.RANDOM_BW,0);
-			else
-				System.out.println("Wait to be completed!");
+			_priority = PacketService.RANDOM_PRIORITY;
 			
-			ps_list.add(ps_tem);
-		}		
-		return ps_list;
+			ps_tem = new BestEffortPacketService(generate_an_id(),_souce_node,_dest_node,_priority,BestEffortPacketService.RANDOM_BW);
+			
+			beps_list.add(ps_tem);
+		}
+		
+		return beps_list;
+	}
+	
+	public List<BandwidthTolerantPacketService> random_BandwidthTolerantPacketService(int packetService_num, int factor)
+	{
+		//TODO factor is not used now.
+		List<BandwidthTolerantPacketService> btps_list = new ArrayList<BandwidthTolerantPacketService>();
+		
+		int _souce_node, _dest_node, _priority, _total_data, _time_limited, tem;
+		BandwidthTolerantPacketService ps_tem = null;
+		for(int i = 0; i<packetService_num; i++)
+		{
+			_souce_node = java.util.concurrent.ThreadLocalRandom.current().nextInt(graph_G.get_vertex_num());
+			_dest_node = java.util.concurrent.ThreadLocalRandom.current().nextInt(graph_G.get_vertex_num());
+			while(_souce_node ==_dest_node)
+			{
+				_souce_node = java.util.concurrent.ThreadLocalRandom.current().nextInt(graph_G.get_vertex_num());
+				_dest_node = java.util.concurrent.ThreadLocalRandom.current().nextInt(graph_G.get_vertex_num());
+			}
+			if(_souce_node > _dest_node)
+			{
+				tem = _souce_node;
+				_souce_node = _dest_node;
+				_dest_node= tem;
+			}
+			_priority = PacketService.RANDOM_PRIORITY;
+			
+			_total_data = ServiceGenerator.RandomTotalDataSize();
+			_time_limited = ServiceGenerator.RandomTimeLongAccordingDataSize(_total_data);
+			
+			ps_tem = new BandwidthTolerantPacketService(generate_an_id(),_souce_node,_dest_node,_priority,_total_data,_time_limited);
+			
+			btps_list.add(ps_tem);
+		}
+		
+		return btps_list;
+	}
+	
+	static public int[] random_TimeIntervalList(int packetService_num)
+	{
+		int[] timeIntervals = new int[packetService_num];
+		for(int i = 0; i<packetService_num;i++)
+			timeIntervals[i] = 15;
+		//TODO
+		
+		return timeIntervals;
 	}
 	
 	public int generatePriority()
@@ -142,24 +186,6 @@ public class ServiceGenerator {
 		else
 			return Service.PRIORITY_LOW;
 	}
-	
-/*	public List<PacketService> random_PacketServices(int random_num,int _static_bw,boolean last_forever_f){
-		//
-		List<PacketService> ps_list = new Vector<PacketService>();
-		int a,b,tem,_priority;
-		for(int i = 0; i < random_num; i++)
-		{
-			
-			if(PacketService.PERMANENT == last_forever_f)
-				ps_list.add(new PacketService(generate_an_id(),a,b,_priority,_static_bw,0));
-			else
-			{
-				int timeLong_tem = (int)(P_rand(5)+1)*LASTTIME_BASE_NUM;
-				ps_list.add(new PacketService(generate_an_id(),a,b,_priority,_static_bw,timeLong_tem));
-			}
-		}
-		return ps_list;		
-	}*/
 	
 	public OpticalService create_OpticalService(){
 		
@@ -239,6 +265,24 @@ public class ServiceGenerator {
 			//System.out.print(real_time_bw[i]+"\t");
 		}
 		return real_time_bw;
+	}
+	
+	public static int RandomTimeLongAccordingDataSize(int data_size)
+	{
+		//TODO
+		int _time_long = -1;
+		//TEM
+		_time_long = data_size/3000;
+		return _time_long;
+	}
+	
+	public static int RandomTotalDataSize()
+	{
+		int _data_size = 0;
+		//TODO tem 
+		_data_size = java.util.concurrent.ThreadLocalRandom.current().nextInt(100000,1000000);
+		
+		return _data_size;
 	}
 	
 	private static int createRandomBasicBW(int priority)

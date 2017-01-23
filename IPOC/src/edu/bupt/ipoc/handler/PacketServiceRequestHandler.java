@@ -19,7 +19,7 @@ public class PacketServiceRequestHandler{
 
 	public synchronized boolean handlerRequest(PacketService ps, int command, Map<Integer,Constraint> cons) 
 	{
-		if(command == PacketService.CARRIED_REQUEST)// || command == PacketService.Modify)
+		if(command == Service.PS_CARRIED_REQUEST)// || command == PacketService.Modify)
 		{
 			cons.put(Constraint.SOURCE_C, new Constraint(Constraint.SOURCE_C,ps.sourceNode,"ps's source id:"+ps.sourceNode));
 			cons.put(Constraint.DEST_C, new Constraint(Constraint.DEST_C,ps.destNode,"ps's DEST id:"+ps.destNode));
@@ -34,39 +34,30 @@ public class PacketServiceRequestHandler{
 			ps.setServiceCarriedType(_con.value);
 			
 			cons.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,ps.getCurrentOccupiedBw(),"ps's request bw:"+ps.getCurrentOccupiedBw()));
-			
+			 
 			if(ps.priority == PacketService.PRIORITY_LOW && _con.value == PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE)
-			{
+			{	//BT Service
 				List<Service> _tems = null;
-				_tems = bc.findExistOnesToFitRequest(ps,command, cons);
+				
+				_tems = bc.getOnesToFitRequest(ps, command, cons);
 				if(_tems != null && _tems.size()>0)
 				{
 					bc.mappingServices(ps, _tems, cons);
 					return true;					
 				}
 			}
-			else
+			else//BE service
 			{
 				Service _tem = null;
-				_tem = bc.findExistOneToFitRequest(ps,command, cons);
+				
+				_tem = bc.getOneToFitRequest(ps, command, cons);
 				if(_tem != null)
 				{
 					//System.out.println("PS ID:"+ps.id+"\n");
 					bc.mappingServices(ps, _tem, null);
 					return true;
 				}
-			}
-			
-			//if we cannot find appropriate vtl(s)
-			Service _tem = null;
-			_tem = bc.establishNewOneToFitRequest(ps, command, cons);
-			if(_tem != null)
-			{
-				bc.mappingServices(ps, _tem, null);
-				return true;
-			}
-			else
-				return false;		
+			}				
 		}
 		return false;
 	}

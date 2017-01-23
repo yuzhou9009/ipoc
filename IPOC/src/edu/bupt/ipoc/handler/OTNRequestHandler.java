@@ -19,7 +19,7 @@ public class OTNRequestHandler {
 	
 	public synchronized boolean handlerRequest(OTNService otns, int command, Map<Integer,Constraint> cons) 
 	{		
-		if(command == OTNService.BUILD_REQUEST)
+		if(command == Service.OTN_BUILD_REQUEST)
 		{
 			Service _tem = null;
 			_tem = bc.findExistOneToFitRequest(otns,command, cons);
@@ -29,7 +29,7 @@ public class OTNRequestHandler {
 				return true;
 			}
 			
-			_tem = bc.establishNewOneToFitRequest(otns, OTNService.BUILD_REQUEST, null);
+			_tem = bc.establishNewOneToFitRequest(otns, Service.OTN_BUILD_REQUEST, null);
 			
 			if(_tem != null)
 			{
