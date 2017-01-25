@@ -356,7 +356,6 @@ public class VirtualTransLink extends Service{
 
 	public int getCurrentStatue() 
 	{
-		// TODO Auto-generated method stub
 		if(this.type == STATIC_AND_NOT_SHARED || this.type == STATIC_BUT_SHARED)
 			return NOT_NEED_ADJUSTED; 
 		
@@ -364,18 +363,14 @@ public class VirtualTransLink extends Service{
 		{
 			if(isBeyondUpperThreshold(NO_CORRECTION))
 			{
-				//TODO logic need to be modified
-				//if(this.vtl_priority == PRIORITY_HIGH || this.vtl_priority == PRIORITY_MID)
 				return NEED_TO_BE_EXTENDED;
-				//if(this.vtl_priority == PRIORITY_LOW)
-					//return NEED_TO_BE_ADJUSTED;
 			}
 			else if(isUnderLowerThreshold(NO_CORRECTION))
 			{
 				if(circuitNumber() == 1)
 				{
 					//TODO System.out.println("This is a special conditions. May be extented!");
-					//TODO If this is a service with low priority, we should do the adjustment.
+					//TODO Later If this is a service with low priority, we should do the adjustment.
 					return NOT_NEED_ADJUSTED;
 				}
 				return NEED_TO_BE_SHRINKED;
@@ -390,7 +385,7 @@ public class VirtualTransLink extends Service{
 		}
 		else if(type == DYNAMIC_AND_SHARED_BUT_CONFILICTING)
 		{
-			//TODO
+			//TODO Later
 		}			
 		return NOT_NEED_ADJUSTED;
 	}
@@ -480,6 +475,7 @@ public class VirtualTransLink extends Service{
 		//max number of circuit needed to be removed
 		//find the longest circuit/s.
 		// TODO
+		//TODO
 		if(this.relevantOTNServices.size()>1)
 			ls.add(this.relevantOTNServices.get(this.relevantOTNServices.size()-1));
 		else if(this.relevantOpticalServices.size()>1)
@@ -508,8 +504,9 @@ public class VirtualTransLink extends Service{
 		for(PacketService _ps : carriedPacketServices)
 		{
 			describtion += "\n\t\t ps id:"+_ps.id+"\t the request bw is:"+_ps.getCurrentOccupiedBw();
-			if(_ps.f_child == true)
-				describtion += "\t it is a ps child, his father id:"+_ps.father_ps.id;
+			//TODO
+//			if(_ps.f_child == true)
+//				describtion += "\t it is a ps child, his father id:"+_ps.father_ps.id;
 			request_bw += _ps.getCurrentOccupiedBw();
 		}
 		describtion += "\n\t\t all ps request bw is :"+request_bw;
@@ -548,5 +545,23 @@ public class VirtualTransLink extends Service{
 	public int smallerValue(int a, int b)
 	{
 		return a<b?a:b;
+	}
+
+	public List<PacketService> getServiceWithLowPriority() {
+		
+		if(this.carriedPacketServices != null && this.carriedPacketServices.size() > 0)
+		{
+			List<PacketService> target_sl = new ArrayList<PacketService>();
+			for(PacketService ps : this.carriedPacketServices)
+			{
+				if(ps.priority == Service.PRIORITY_LOW)
+					target_sl.add(ps);
+			}
+			if(target_sl.size()>0)
+				return target_sl;
+		}
+		else
+				System.out.println("Never be here!");
+		return null;
 	}
 }

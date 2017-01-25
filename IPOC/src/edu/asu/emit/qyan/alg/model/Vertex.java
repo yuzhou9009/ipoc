@@ -87,6 +87,17 @@ public class Vertex implements BaseVertex, Comparable<Vertex>
 			return 0;
 	}
 	
+	@Override
+	public boolean equals(Object right)
+	{
+		if(right instanceof Vertex)
+		{
+			Vertex r_vertex = (Vertex) right;
+			return (this.get_id() == r_vertex.get_id());
+		}
+		return false;
+	}
+	
 	public static void reset()
 	{
 		CURRENT_VERTEX_NUM = 0;

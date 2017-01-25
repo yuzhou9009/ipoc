@@ -89,12 +89,16 @@ public class VTLManager{
 					else if(sub_optimal_vtls.size()>0)
 					{//No need to check null.
 						t_vtl = findShortestWithRichestBwVTL(preferred_vtls);
-						if(!adjustBwAllocationOfBTServices(t_vtl,init_bw_c.value))
+						
+						Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
+						consmp.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,init_bw_c.value - t_vtl.getRestBW(),"adjustment request bw:"+(init_bw_c.value - t_vtl.getRestBW())));
+					
+						if(!bc.handleServiceRequest(t_vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp))
 							return null;
 					}
 					else if(last_option_vtls.size()>0)
 					{
-						//later todo, sort the list.
+						//TODO later todo, sort the list.
 						for(VirtualTransLink _vtl : last_option_vtls)
 						{
 							Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
@@ -104,15 +108,15 @@ public class VTLManager{
 							_cons.put(Constraint.INITBW_C, _con);
 							if(bc.handleServiceRequest(_vtl, VirtualTransLink.EXTEND_REQUEST,_cons))
 							{
-								if(!adjustBwAllocationOfBTServices(t_vtl,init_bw_c.value))
-									return null;
+								//TODO MAY NEED ADJUSTMENT LATER
+								//if(!bc.handleServiceRequest(_vtl, VirtualTransLink.ADJUST_PSS_REQUEST, cons))
+								//	return null;
 								t_vtl = _vtl;
 								break;
 							}
 						}
 					}
 					return t_vtl;
-					
 				}
 			}
 			else
@@ -120,16 +124,10 @@ public class VTLManager{
 		}		
 		return null;
 	}
-	
-	public boolean adjustBwAllocationOfBTServices(VirtualTransLink _vtl, int value) {
-		// TODO Auto-generated method stub
-		//Vary Important
-		return false;
-	}
 
 	//For BT service
-	public List<VirtualTransLink> findFitVTLs(Map<Integer, Constraint> cons) {
-		
+	public List<Pair<Service,Integer>> findFitVTLsWithBwValue(Map<Integer, Constraint> cons)
+	{
 		if(ensureHaveAllNeededConstraints(cons) && cons.get(Constraint.PRIORITY_C).value == VirtualTransLink.PRIORITY_LOW)//sure
 		{
 			if(cons.get(Constraint.VTL_CARRY_TYPE_C).value != VirtualTransLink.VTL_BOD)
@@ -138,7 +136,7 @@ public class VTLManager{
 			List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer, Integer>(cons.get(Constraint.SOURCE_C).value,cons.get(Constraint.DEST_C).value));
 			if(vtll != null && !vtll.isEmpty())
 			{	
-				List<VirtualTransLink> tem_vtll = new ArrayList<VirtualTransLink>();
+				List<Pair<Service,Integer>> tem_vtll = new ArrayList<Pair<Service,Integer>>();
 				int allRequestBW = cons.get(Constraint.INITBW_C).value;
 				int canOfferBW = 0;
 				for(VirtualTransLink vtl : vtll)
@@ -149,7 +147,7 @@ public class VTLManager{
 						if(canOfferBW > 0)
 						{
 							allRequestBW -= canOfferBW;
-							tem_vtll.add(vtl);
+							tem_vtll.add(new Pair(vtl,canOfferBW));
 							if(allRequestBW <= 0)
 							{
 								return tem_vtll;
@@ -171,7 +169,7 @@ public class VTLManager{
 							if(canOfferBW > 0)
 							{
 								allRequestBW -= canOfferBW;
-								tem_vtll.add(vtl);
+								tem_vtll.add(new Pair(vtl,canOfferBW));
 								if(allRequestBW <= 0)
 								{
 									return tem_vtll;
@@ -364,7 +362,12 @@ public class VTLManager{
 		{
 			int adjust_bw_value = 0;
 			//TODO calulate
-			adjustBwAllocationOfBTServices(vtl,adjust_bw_value);
+			//TODO
+			//TODO
+			
+			//bc.handleServiceRequest(t_vtl, VirtualTransLink.ADJUST_PSS_REQUEST, cons));
+			
+			//adjustBwAllocationOfBTServices(vtl,adjust_bw_value);
 		}	
 	}
 

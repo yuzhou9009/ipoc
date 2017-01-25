@@ -120,8 +120,11 @@ public class OpticalServiceManager{
 
 		for(OpticalService _ooo : osl_tem)
 		{			
-			if(_ooo.path.equals(_path) && _ooo.type == OpticalService.CHANNEL_10G_FOT_OTN)
-				osl_return.add(_ooo);
+			if(_ooo.type == OpticalService.CHANNEL_10G_FOT_OTN)
+			{
+				if((_path != null && _ooo.path.equals(_path)) || _path == null)
+					osl_return.add(_ooo);					
+			}
 		}
 		
 		return osl_return;

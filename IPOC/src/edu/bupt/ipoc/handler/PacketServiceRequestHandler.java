@@ -3,6 +3,7 @@ package edu.bupt.ipoc.handler;
 import java.util.List;
 import java.util.Map;
 
+import edu.asu.emit.qyan.alg.model.Pair;
 import edu.bupt.ipoc.constraint.Constraint;
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.PacketService;
@@ -37,9 +38,9 @@ public class PacketServiceRequestHandler{
 			 
 			if(ps.priority == PacketService.PRIORITY_LOW && _con.value == PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE)
 			{	//BT Service
-				List<Service> _tems = null;
+				List<Pair<Service,Integer>> _tems = null;
 				
-				_tems = bc.getOnesToFitRequest(ps, command, cons);
+				_tems = bc.getOnesWithBwValueToFitRequest(ps, command, cons);
 				if(_tems != null && _tems.size()>0)
 				{
 					bc.mappingServices(ps, _tems, cons);

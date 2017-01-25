@@ -27,13 +27,9 @@ public class PacketService extends Service{
 	public int carried_type;
 
 	public boolean isPermanent = PERMANENT;//if the scheduled_time_long = 0, it will be a permanent service, otherwise, it is not.
-	
-	public boolean f_child = false;
-	public PacketService father_ps = null;
 
 	public VirtualTransLink carriedVTL;
 
-	public List<PacketService> sub_packet_services = null;
 	
 	public PacketService(int _id, int _sourceNode, int _destNode, int _priority)
 	{
@@ -89,9 +85,7 @@ public class PacketService extends Service{
 	public void cleanMyselfWithoutBucketCount()
 	{
 		carriedVTL = null;
-		if(sub_packet_services != null)
-			sub_packet_services.clear();
-		sub_packet_services = null;
+		//TODO
 	}
 
 }

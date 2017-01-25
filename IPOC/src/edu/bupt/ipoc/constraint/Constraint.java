@@ -15,6 +15,8 @@ public class Constraint {
 	
 	public static final int FENJI_C = 8;	
 	
+	public static final int VTL_PREFER_RESOURCE_C = 9;
+	
 	public int type;
 	public int value;
 	public String description;

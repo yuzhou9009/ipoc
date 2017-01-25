@@ -57,8 +57,9 @@ public class PacketServiceManager{
 		return false;
 	}
 	
-	public List<Service> shrinkedPSforMoreBW(int _source, int _dest, int differ_bw)
+	public List<Pair<Service, Integer>> shrinkedPSforMoreBW(int _source, int _dest, int differ_bw)
 	{
+		//TODO
 		List<PacketService> _psl = vertex_pair_ps_map.get(new Pair<Integer,Integer>(_source, _dest));
 		
 		List<BandwidthTolerantPacketService> tem_psl = new ArrayList<BandwidthTolerantPacketService>();
@@ -76,7 +77,7 @@ public class PacketServiceManager{
 		int tem_bw = 0;
 		List<BandwidthTolerantPacketService> wait_btpsl = new ArrayList<BandwidthTolerantPacketService>();
 		
-		List<Pair<BandwidthTolerantPacketService,Integer>> wait_ps = new ArrayList<Pair<BandwidthTolerantPacketService,Integer>>();
+		List<Pair<Service,Integer>> wait_ps = new ArrayList<Pair<Service,Integer>>();
 		
 		for(BandwidthTolerantPacketService btps : tem_psl)
 		{
@@ -84,9 +85,9 @@ public class PacketServiceManager{
 			if(tem_bw > 0)
 			{
 				if(tem_bw >= rest_bw)
-					wait_ps.add(new Pair<BandwidthTolerantPacketService,Integer>(btps,rest_bw));
+					wait_ps.add(new Pair<Service, Integer>(btps,rest_bw));
 				else
-					wait_ps.add(new Pair<BandwidthTolerantPacketService,Integer>(btps,tem_bw));
+					wait_ps.add(new Pair<Service, Integer>(btps,tem_bw));
 				rest_bw -= tem_bw;
 			}
 			if(rest_bw <= 0)
@@ -97,14 +98,29 @@ public class PacketServiceManager{
 		
 		if(rest_bw <= 0)
 		{
-			List<Service> resutls = new ArrayList<Service>();
-			for(Pair<BandwidthTolerantPacketService,Integer> pair : wait_ps)
+			//List<Service> resutls = new ArrayList<Service>();
+			List<Pair<Service,Integer>> results = new ArrayList<Pair<Service,Integer>>();
+			
+			List<Pair<Service,Integer>> shringked_vtls;
+			
+			BandwidthTolerantPacketService tem;
+			for(Pair<Service,Integer> pair : wait_ps)
 			{
-				List<Service> shrinked_vtl = pair.o1.shrinkedWithBW(pair.o2);
-				resutls.addAll(shrinked_vtl);
+				tem = (BandwidthTolerantPacketService)(pair.o1);
+				shringked_vtls = tem.shrinkedWithBW(pair.o2);
+				if(shringked_vtls != null)
+					combineServicesWithBw(results,shringked_vtls);
+				else
+					System.out.println("Big mistake");
 			}
 		}
 		//else		
 		return null;
+	}
+
+	private void combineServicesWithBw(List<Pair<Service, Integer>> results,
+			List<Pair<Service, Integer>> shringked_vtls) {
+		// TODO Auto-generated method stub
+		
 	}
 }

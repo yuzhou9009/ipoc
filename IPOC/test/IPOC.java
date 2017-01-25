@@ -44,6 +44,7 @@ public class IPOC {
 		time_interval_list = sg.random_TimeIntervalList(bt_packet_num);
 		
 		cc = new CentralizedController(graph_G);
+		cc.f_debug_info = true;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////	
@@ -133,10 +134,12 @@ public class IPOC {
 			{
 				//for all running BT service, check their state
 				//If any service is out of date, remove it. do the adjustment.
-				cc.em.checkEventList();
+				//cc.em.checkEventList();
 				
 				if(count_for_next_service == 0)
 				{
+					if(bt_service_count >= bt_packet_num)
+						continue;
 					Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 					consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
 							new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE, "The ps will be carried with vtl-bod!"));

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.asu.emit.qyan.alg.model.Pair;
 import edu.asu.emit.qyan.alg.model.Path;
 import edu.asu.emit.qyan.alg.model.VariableGraph;
 import edu.bupt.ipoc.constraint.Constraint;
@@ -17,16 +18,20 @@ import edu.bupt.ipoc.managers.OTNServiceManager;
 import edu.bupt.ipoc.managers.OpticalServiceManager;
 import edu.bupt.ipoc.managers.PacketServiceManager;
 import edu.bupt.ipoc.managers.VTLManager;
+import edu.bupt.ipoc.service.BandwidthTolerantPacketService;
 import edu.bupt.ipoc.service.OTNService;
 import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
+import edu.bupt.ipoc.service.SubBTService;
 import edu.bupt.ipoc.service.ServiceGenerator;
 import edu.bupt.ipoc.service.VirtualTransLink;
 import edu.bupt.ipoc.tools.SimpleStatisticTool;
 
 public class CentralizedController implements BasicController {
 
+	public boolean f_debug_info = false;
+	
 	private VariableGraph graph_G = null;
 	
 	public PacketServiceManager psm = null;
@@ -125,6 +130,7 @@ public class CentralizedController implements BasicController {
 		return null;
 	}
 	
+	/*
 	@Override
 	public List<Service> findExistOnesToFitRequest(Service ss, int command, Map<Integer,Constraint> cons) {
 		
@@ -139,7 +145,7 @@ public class CentralizedController implements BasicController {
 			System.out.println("Wrong input in findExistOnesToFitRequest,check!");
 
 		return null;
-	}
+	}*/
 
 	@Override
 	public Service establishNewOneToFitRequest(Service ss, int command, Map<Integer,Constraint> cons) {
@@ -233,9 +239,9 @@ public class CentralizedController implements BasicController {
 			else if(_vtl.type == VirtualTransLink.VTL_BOD)
 			{
 				if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH)
-					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_high)+1;
+					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_high);//+1;
 				else if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
-					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_mid)+1;
+					_init_bw_c = (int)(_init_bw_c/_vtl.th_usp_mid);//0+1;
 			}
 
 			if(command == VirtualTransLink.BUILD_REQUEST)
@@ -255,6 +261,7 @@ public class CentralizedController implements BasicController {
 					//TODO need to be extended, we should use all otns which have the same path, not limited the same os.
 					List<OpticalService> _osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
 					//OpticalService _os = osm.findFitOs(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
+					
 					if(_osl !=null)
 					{
 						return setUpOTNServices(_osl,_init_bw_c);
@@ -278,11 +285,9 @@ public class CentralizedController implements BasicController {
 			}			
 			else if(command == VirtualTransLink.EXTEND_REQUEST)
 			{
-				if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW)
-				{
-					//TODO
-				}
-				else
+				List<OpticalService> _osl = null;
+				
+				if(_vtl.vtl_priority != VirtualTransLink.PRIORITY_LOW)
 				{
 					for(OTNService onts : _vtl.relevantOTNServices)
 					{
@@ -295,54 +300,58 @@ public class CentralizedController implements BasicController {
 					
 					//if not success, we should can use otn in optical services which has the same path with the original ones.
 					Path _path = _vtl.relevantOTNServices.get(0).osBelongTo.path;
-					
-					List<OpticalService> _osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_path);
-					List<Service> sl_return = new ArrayList<Service>();
-					
-					int tem_bw = 0;
+					_osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_path);
+				}
+				else
+				{
+					_osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,null);
+				}
+
+				List<Service> sl_return = new ArrayList<Service>();
+				
+				int tem_bw = 0;
+				for(OpticalService _os : _osl)
+				{
+					tem_bw += _os.getNumberofFreeOTNs() * Service.BW_1G;
+				}
+				
+				if(tem_bw >= _init_bw_c)
+				{
 					for(OpticalService _os : _osl)
-					{
-						tem_bw += _os.getNumberofFreeOTNs() * Service.BW_1G;
-					}
-					
-					if(tem_bw >= _init_bw_c)
-					{
-						for(OpticalService _os : _osl)
-						{							
-							if(_os.getNumberofFreeOTNs() == 0)
-								continue;
-							int _bw = _os.getNumberofFreeOTNs() * Service.BW_1G;
-							if(_init_bw_c > _bw)
-							{
-								sl_return.addAll(setUpOTNServices(_os,_bw));								
-							}
-							else// if(_init_bw_c <= tem_bw)
-							{
-								sl_return.addAll(setUpOTNServices(_os,_init_bw_c));
-							}
-							_init_bw_c -= _bw;
-							
-							if(_init_bw_c < 0)
-								break;	
+					{							
+						if(_os.getNumberofFreeOTNs() == 0)
+							continue;
+						int _bw = _os.getNumberofFreeOTNs() * Service.BW_1G;
+						if(_init_bw_c > _bw)
+						{
+							sl_return.addAll(setUpOTNServices(_os,_bw));								
 						}
+						else// if(_init_bw_c <= tem_bw)
+						{
+							sl_return.addAll(setUpOTNServices(_os,_init_bw_c));
+						}
+						_init_bw_c -= _bw;
 						
 						if(_init_bw_c < 0)
-						{
-							return sl_return;
-						}
-					}					
-					else
-					{
-						OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
-								_vtl.sourceVertex, _vtl.destVertex, 1, 0);
-						if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
-						{
-							_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
-							this.saveService(_os);
-							return setUpOTNServices(_os,_init_bw_c);
-						}
+							break;	
 					}
-				}								
+					
+					if(_init_bw_c < 0)
+					{
+						return sl_return;
+					}
+				}					
+				else
+				{
+					OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
+							_vtl.sourceVertex, _vtl.destVertex, 1, 0);
+					if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
+					{
+						_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
+						this.saveService(_os);
+						return setUpOTNServices(_os,_init_bw_c);
+					}
+				}							
 			}
 			
 		}
@@ -393,37 +402,28 @@ public class CentralizedController implements BasicController {
 		return true;
 	}
 	
+
 	@Override
-	public boolean mappingServices(Service ss, List<Service> _tems, Map<Integer, Constraint> cons) {
-		if(ss instanceof PacketService)
+	public boolean mappingServices(Service ss, List<Pair<Service, Integer>> _tems, Map<Integer, Constraint> cons) {
+		//only for bt service
+		if(ss instanceof BandwidthTolerantPacketService)
 		{
-			PacketService ps = (PacketService)ss;
-			if(_tems.get(0) instanceof VirtualTransLink)
+			BandwidthTolerantPacketService btps = (BandwidthTolerantPacketService)ss;
+			if(_tems.get(0).o1 instanceof VirtualTransLink)
 			{
-				List<VirtualTransLink> vtls = (List)_tems;
-				if(vtls != null)
+				if(_tems != null)
 				{
 					{
-						//test
-						int _arbw = ps.getCurrentOccupiedBw();
-						int bww = 0;
-						for(VirtualTransLink vsss : vtls)
+						btps.sub_btpss = new ArrayList<SubBTService>();
+						for(Pair<Service, Integer> vtl_bw : _tems)
 						{
-							bww += vsss.getAcutallyRestBWforShare();//getAcutallyRestBW();
+							SubBTService sub_btps = new SubBTService(ServiceGenerator.generate_an_id(), btps.sourceNode,
+									btps.destNode,btps.priority, (VirtualTransLink)vtl_bw.o1, vtl_bw.o2, btps);
+							btps.sub_btpss.add(sub_btps);
 						}
-						if(bww<_arbw)
-						{
-							System.out.println("**************big problem£¬the different value is"+ (bww-_arbw));
-							
-							int _total_need_bw = ps.getCurrentOccupiedBw();
-							System.out.println("Total need bw is"+_total_need_bw);
-							for(VirtualTransLink vsss : vtls)
-							{
-								System.out.println("the type of vsss is:"+vsss.vtl_priority+"\tthis can offer bw:"+vsss.getAcutallyRestBWforShare()+"this not limited is :"+vsss.getAcutallyRestBWforShareNoLimit());//getAcutallyRestBW();
-							}
-							
-							
-						}
+						btps.updateCurrent_rate();
+
+						//TODO BTPS BW VERIFY
 					}					
 				}
 				return true;
@@ -432,6 +432,20 @@ public class CentralizedController implements BasicController {
 		System.out.println("check the input for mapping services");
 		return false;
 		
+	}
+	
+	@Override
+	public boolean unmappingServices(Service ss, Service _tems, Map<Integer, Constraint> cons) {
+		if(ss instanceof PacketService)
+		{
+			if(_tems instanceof VirtualTransLink)
+			{
+				((VirtualTransLink) _tems).removeCarriedPacketService((PacketService)ss);
+			}
+		}
+		System.out.println("Should never be here!!");
+		
+		return false;
 	}
 	
 	@Override
@@ -540,113 +554,172 @@ public class CentralizedController implements BasicController {
 		{
 			return osm.getAvailableOTNsNumber(_source, _dest);
 		}
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	@Override
-	public List<Service> getOnesToFitRequest(Service ss, int command, Map<Integer, Constraint> cons) {
-		// TODO Auto-generated method stub
-		//if(ss instanceof BandwidthTolerantPacketService)
-		if(ss instanceof PacketService)
-		{
-			PacketService ps = (PacketService)ss;
-			if(((PacketService) ss).priority != Service.PRIORITY_LOW)
-				return null;
 
+	@Override
+	public List<Pair<Service, Integer>> getOnesWithBwValueToFitRequest(Service ss, int command,
+			Map<Integer, Constraint> cons) {
+		if(ss instanceof BandwidthTolerantPacketService)
+		{
+			BandwidthTolerantPacketService btps = (BandwidthTolerantPacketService)ss;
 			int tem_bw = cons.get(Constraint.INITBW_C).value;
-			cons.get(Constraint.INITBW_C).value = (int)(Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW);
+			List<Pair<Service,Integer>> target_vtls;
 			
-			List<VirtualTransLink> target_vtls = vtlm.findFitVTLs(cons);
-			VirtualTransLink tem_vtl;
+			cons.get(Constraint.INITBW_C).value = (int)(Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW);
+			target_vtls = vtlm.findFitVTLsWithBwValue(cons);
+			
 			if(target_vtls != null && target_vtls.size()>0)
-				return (List)target_vtls;
+				return target_vtls;
 			
 			cons.get(Constraint.INITBW_C).value = tem_bw;
-			target_vtls = new ArrayList<VirtualTransLink>();
-			tem_vtl = vtlm.findAnExtendedableVTL(cons);
+			target_vtls = new ArrayList<Pair<Service,Integer>>();
+			VirtualTransLink tem_vtl = vtlm.findAnExtendedableVTL(cons);
 			
 			if(tem_vtl != null)
 			{
 				if(vtlrh.handlerRequest(tem_vtl, VirtualTransLink.EXTEND_REQUEST, null))//EXTEND 10G
 				{
-					target_vtls.add(tem_vtl);
-					return (List)target_vtls;
+					target_vtls.add(new Pair(tem_vtl,(int)(Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW)));
+					return target_vtls;
 				}
 			}
 			else
 			{
-				tem_vtl = (VirtualTransLink)establishNewOneToFitRequest(ps, Service.UseOTNService, cons);//new vtl 1G
-				if(tem_vtl == null)
+				VirtualTransLink _vtl = new VirtualTransLink();
+				_vtl.setID(ServiceGenerator.generate_an_id());
+				_vtl.setSourceAndDest(btps.sourceNode, btps.destNode);
+				_vtl.setPrioriy(btps.priority);
+				_vtl.setTypeAccordingToConstraints(cons);
+				
+				Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
+				
+				_cons.put(Constraint.VTL_PREFER_RESOURCE_C, 
+						new Constraint(Constraint.VTL_PREFER_RESOURCE_C,Service.UseOpticalService, "The vtl prefer use optical service"));
+				
+				if(handleServiceRequest(_vtl, VirtualTransLink.BUILD_REQUEST, _cons))
 				{
-					;//TODO adjust;
-					return null;//TODO
+					tem_vtl = _vtl;
+					target_vtls.add(new Pair(tem_vtl,(int)(Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW)));
+					return target_vtls;
 				}
 			}
-	
-			int allRequestBW = cons.get(Constraint.INITBW_C).value;			
+			
 			int canOfferBW = 0;
 			int tem = 0;
 			
-			List<VirtualTransLink> _vtll = vtlm.getVTLs(tem_vtl.sourceVertex, tem_vtl.destVertex);
-			for(VirtualTransLink vtl : _vtll)
+			List<VirtualTransLink> _vtll = vtlm.getVTLs(btps.sourceNode, btps.destNode);
+			if(_vtll != null && _vtll.size() > 0)
 			{
-				if(vtl.type == VirtualTransLink.VTL_BOD)
+				for(VirtualTransLink vtl : _vtll)
 				{
-					tem = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
-					if(canOfferBW > 0)
+					if(vtl.type == VirtualTransLink.VTL_BOD)
 					{
-						canOfferBW += tem;
-						target_vtls.add(vtl);
+						tem = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
+						if(canOfferBW > 0)
+						{
+							canOfferBW += tem;
+							target_vtls.add(new Pair(vtl,tem));
+						}
+						else if(canOfferBW<0)
+							System.out.println("There must be some big mistake!! the canOfferBW is:"+canOfferBW);
 					}
-					else if(canOfferBW<0)
-						System.out.println("There must be some big mistake!! the canOfferBW is:"+canOfferBW);
 				}
 			}
+			else
+				System.out.println("Why");
 			
 			if(canOfferBW >= (Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW))
 			{
 				//TODO later. sort the vtls.
-				System.out.println("very little channce to be here");
-				return (List)target_vtls;
+				System.out.println("There is no way to be here");
+				return target_vtls;
 			}
 			else
 			{
 				int _rest_need_bw_max = (int)(Service.MAX_ALLOWED_BW * VirtualTransLink.TH_USP_LOW) - canOfferBW;		
 				int availble_otn_number = 0;
+				int minAllRequestBW = cons.get(Constraint.INITBW_C).value;		
 				
-				availble_otn_number = osm.getAvailableOTNsNumber(tem_vtl.sourceVertex, tem_vtl.destVertex);//System.out.println("otn_1G_number"+otn_1G_number);
-				//TODO if availble_otn_number == 0
+				availble_otn_number = osm.getAvailableOTNsNumber(btps.sourceNode, btps.destNode);//System.out.println("otn_1G_number"+otn_1G_number);
+
 				int bw_can_be_requested = 0;
 				if((int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW) >= _rest_need_bw_max)
 					bw_can_be_requested = _rest_need_bw_max;
 				else
 				{
 					bw_can_be_requested = (int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW);
-					if((int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW) + canOfferBW < allRequestBW )
+					if((int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW) + canOfferBW < minAllRequestBW )
 					{
-						int differ_value = allRequestBW - canOfferBW - (int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW);
-						//TODO
-						//Adjustment with chazhi
-						//if adjustment failed, return null;
+						int differ_value = minAllRequestBW - canOfferBW - (int)(availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW);
+						List<Pair<Service,Integer>> tt= psm.shrinkedPSforMoreBW(btps.sourceNode, btps.destNode, differ_value);
+						if(tt == null || tt.size() <=0)
+							return null;
+						target_vtls.addAll(tt);
+						if(availble_otn_number == 0)
+							return target_vtls;
 					}
 				}
 				
-				Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
-				Constraint _con = new Constraint(Constraint.INITBW_C,bw_can_be_requested,"Cons bw is"+bw_can_be_requested);
-				_cons.put(Constraint.INITBW_C, _con);
-				
-				if(handleServiceRequest(tem_vtl, VirtualTransLink.EXTEND_REQUEST,_cons))
+				if(tem_vtl != null)
 				{
-					return (List)target_vtls;
+					Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
+					Constraint _con = new Constraint(Constraint.INITBW_C,bw_can_be_requested,"Cons bw is"+bw_can_be_requested);
+					_cons.put(Constraint.INITBW_C, _con);
+					
+					if(handleServiceRequest(tem_vtl, VirtualTransLink.EXTEND_REQUEST,_cons))
+					{
+						target_vtls.add(new Pair(tem_vtl,bw_can_be_requested));
+						return target_vtls;
+					}
+					else
+					{
+						System.out.println("bw_can_be_requested"+bw_can_be_requested);
+						System.out.println("This should not be happened!");
+						return null;
+					}
 				}
 				else
 				{
-					System.out.println("This should not be happened!");
-					return null;
+					VirtualTransLink _vtl = new VirtualTransLink();
+					_vtl.setID(ServiceGenerator.generate_an_id());
+					_vtl.setSourceAndDest(btps.sourceNode, btps.destNode);
+					_vtl.setPrioriy(btps.priority);
+					_vtl.setTypeAccordingToConstraints(cons);
+					
+					Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
+					
+					_cons.put(Constraint.VTL_PREFER_RESOURCE_C, 
+							new Constraint(Constraint.VTL_PREFER_RESOURCE_C,Service.UseOTNService, "The vtl prefer use OTN service"));
+					
+					if(handleServiceRequest(_vtl, VirtualTransLink.BUILD_REQUEST, _cons))
+					{
+						tem_vtl = _vtl;
+						target_vtls.add(new Pair(tem_vtl,(int)(Service.BW_1G * VirtualTransLink.TH_USP_LOW)));
+					}
+					if(tem_vtl == null)
+						System.out.println("Should not be here");					
+					
+					availble_otn_number--;
+					if(availble_otn_number > 0)
+					{
+						bw_can_be_requested = (int)((availble_otn_number * Service.BW_1G * VirtualTransLink.TH_USP_LOW));
+						_cons.clear();
+						_cons = new HashMap<Integer,Constraint>();
+						Constraint _con = new Constraint(Constraint.INITBW_C,bw_can_be_requested,"Cons bw is"+bw_can_be_requested);
+						_cons.put(Constraint.INITBW_C, _con);					
+						if(handleServiceRequest(tem_vtl, VirtualTransLink.EXTEND_REQUEST,_cons))
+						{
+							target_vtls.add(new Pair(tem_vtl,bw_can_be_requested));
+						}
+					}
+					return target_vtls;
 				}
 			}			
-		}		
+		}
+		// TODO Auto-generated method stub
+		System.out.println("Bad input in getOnesWithBwValueToFitRequest");
 		return null;
 	}
 
@@ -657,8 +730,10 @@ public class CentralizedController implements BasicController {
 		{
 			PacketService ps = (PacketService)ss;
 			if(ps.priority == Service.PRIORITY_LOW)
+			{
+				//TODO LATER
 				return null;
-			
+			}
 			Service _tem;
 			_tem = findExistOneToFitRequest(ps,command, cons);
 			if(_tem != null)
@@ -676,7 +751,67 @@ public class CentralizedController implements BasicController {
 		}
 		return null;
 	}
-
-
 	
+	public boolean adjustSpecificVTL(VirtualTransLink _vtl, int _adjust_bw)
+	{
+		VirtualTransLink tem_vtl;
+		Map<Integer, Constraint> cons;
+		
+		List<PacketService> tem_pss = _vtl.getServiceWithLowPriority();
+		int request_bw = 0;
+		
+		//TODO sort tem_ss;
+		
+		if(request_bw > 0)
+		{
+			
+			SubBTService sub_s;
+			int canOfferBW = 0;
+			
+			List<SubBTService> target_ss = new ArrayList<SubBTService>();
+			
+			for(Service t_s : tem_pss)
+			{
+				sub_s = (SubBTService)t_s;
+				canOfferBW += sub_s.bwCanShrinked();
+				target_ss.add(sub_s);
+				if(canOfferBW >= request_bw)
+					break;			
+			}
+			
+			if(canOfferBW >= request_bw)
+			{
+				for(SubBTService _t_sub_s : target_ss)
+				{
+					canOfferBW = _t_sub_s.bwCanShrinked();
+					if(canOfferBW > request_bw)
+						_t_sub_s.shrinkItself(request_bw);
+					else
+					{
+						_t_sub_s.shrinkItself(canOfferBW);
+						this.unmappingServices(_t_sub_s, _t_sub_s.father_btps,null);
+					}
+						
+				}
+			}
+		}
+		else if(request_bw < 0)
+		{
+			
+		}
+		else
+		{
+			System.out.println("Should not be here, bigbug");
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean debugInfo() {
+		// TODO Auto-generated method stub
+		return f_debug_info;
+	}
+
+
 }
