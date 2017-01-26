@@ -1,11 +1,12 @@
 package edu.bupt.ipoc.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import edu.asu.emit.qyan.alg.model.Pair;
 
-public class BandwidthTolerantPacketService extends PacketService implements Comparable<BandwidthTolerantPacketService>{
+public class BandwidthTolerantPacketService extends PacketService implements Comparable<PacketService>{
 	
 
 	//if it is not a permanent service,these parameters must be set.
@@ -36,7 +37,7 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 	public int getCurrentOccupiedBw()
 	{
 		if(current_rate == 0)
-			return (total_data_size/limited_time)+1;
+			return (rest_data_to_be_transfered/rest_time_long)+1;
 		else
 			return current_rate;
 	}
@@ -48,6 +49,8 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 		{
 			current_rate += subbts.static_bw;
 		}
+		if(current_rate > (int)(Service.MAX_ALLOWED_BW * TH_USP_LOW))
+			System.out.println("Out of range there must be something wrong :"+current_rate);
 		return current_rate;
 	}
 	
@@ -63,52 +66,106 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 	}
 
 	@Override
-	public int compareTo(BandwidthTolerantPacketService o) {
-		return this.rest_time_long - o.rest_time_long;				
+	public int compareTo(PacketService o) {
+		if(o instanceof BandwidthTolerantPacketService)
+			return this.rest_time_long - ((BandwidthTolerantPacketService)o).rest_time_long;
+		else
+			return super.compareTo(o);
 	}
 
 	public int maxBWCanBeShrinked() {
-		// TODO Auto-generated method stub
-		int tem =  rest_data_to_be_transfered/rest_time_long - current_rate;
+		int tem =  current_rate - rest_data_to_be_transfered/rest_time_long - 1;
 		//TODO NEED TO BE TESTED
 		if(tem >= Service.MIN_SHARED_BW_GRANULARITY)
 			return tem;
 		else
 			return 0;
 	}
+	
+
+	public int maxBWCanBeExpended() {
+		
+		return (int)(Service.MAX_ALLOWED_BW * TH_USP_LOW) - current_rate;
+	}
 
 	public List<Pair<Service,Integer>> shrinkedWithBW(int o2) {
-		// TODO Auto-generated method stub
 		if((this.current_rate - o2) < (rest_data_to_be_transfered/rest_time_long))
 			System.out.println("Something wrong, must check");
-		List<Service> target_vtls = new ArrayList<Service>();
+		List<Pair<Service,Integer>> target_vtls = new ArrayList<Pair<Service,Integer>>();
+		List<SubBTService> removed_list = new ArrayList<SubBTService>();
 		
+		int rest_request_bw = o2;
+		Collections.sort(this.sub_btpss);
 		
-		//TODO sort the children
-		for(SubBTService sub_btps : this.sub_btpss)
+		for(SubBTService ss : this.sub_btpss)
 		{
-			//TODO
-			/*
-			for(Service ss : this.sub_packet_services)
+			if(ss.static_bw <= rest_request_bw)
 			{
-				if(ss < rest_bw)
-					ps.removeMyself();
-				else
-					ps.shrinkBW();
-			}*/
+				target_vtls.add(new Pair<Service,Integer>(ss.carriedVTL,ss.static_bw));
+				rest_request_bw -= ss.static_bw;
+				ss.shrinkItself(ss.static_bw);
+				removed_list.add(ss);
+			}
+			else
+			{
+				target_vtls.add(new Pair<Service,Integer>(ss.carriedVTL,rest_request_bw));
+				ss.shrinkItself(rest_request_bw);
+				break;
+			}
 		}
-		return null;
-	}
-	
-	public boolean shrinkWithBw(int bw)
-	{
-		//TODO
-		return true;
+		
+		if(removed_list.size() > 0)
+		{
+			for(SubBTService removed_subbt : removed_list)
+			{
+				removed_subbt.carriedVTL.removeCarriedPacketService(removed_subbt);
+				//TODO UNMAPPING
+				removed_subbt.father_btps.removeSubBTService(removed_subbt);//unmapping
+			}
+		}
+		if(target_vtls.size() > 0)
+			return target_vtls;
+		else
+			return null;
 	}
 
 	public void removeSubBTService(SubBTService subBTService) {
 		if(!sub_btpss.remove(subBTService))
 			System.out.println("Something wrong");
+		
+	}
+
+	public int checkStatue() {
+
+		updateCurrent_rate();
+		
+		if(current_rate < rest_data_to_be_transfered/rest_time_long)
+			System.out.println("There must be some bug here,current_rate:"+ current_rate +"calculate rest" + ( rest_data_to_be_transfered/rest_time_long));
+
+		rest_data_to_be_transfered -= this.current_rate * Service.TIME_STEP;		
+		rest_time_long -= Service.TIME_STEP;
+		
+		if(rest_data_to_be_transfered <= 0)
+			return NEED_TO_BE_REMOVED;
+		else if(rest_time_long == 0)
+		{
+			System.out.println("rest_data:"+ rest_data_to_be_transfered);
+		}
+		
+		return STILL_RUNNING;
+	}
+
+	public String toString()
+	{
+		String describtion = new String();
+		
+		if(this.sub_btpss != null && this.sub_btpss.size() > 0)
+		{
+			for(SubBTService subbt : this.sub_btpss)
+				describtion += subbt.toString()+"\n";
+		}
+		
+		return describtion;
 		
 	}
 

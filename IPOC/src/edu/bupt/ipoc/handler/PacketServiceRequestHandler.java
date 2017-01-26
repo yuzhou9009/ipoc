@@ -6,6 +6,7 @@ import java.util.Map;
 import edu.asu.emit.qyan.alg.model.Pair;
 import edu.bupt.ipoc.constraint.Constraint;
 import edu.bupt.ipoc.controller.BasicController;
+import edu.bupt.ipoc.service.BandwidthTolerantPacketService;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
 
@@ -60,6 +61,18 @@ public class PacketServiceRequestHandler{
 				}
 			}				
 		}
+		else if(command == Service.PS_REMOVED_REQUEST)
+		{
+			if(ps instanceof BandwidthTolerantPacketService)
+			{
+				for(PacketService sub_ps : ((BandwidthTolerantPacketService)ps).sub_btpss)
+				{
+					bc.unmappingServices(sub_ps, sub_ps.carriedVTL, null);				
+				}
+				return true;
+			}
+		}
+		
 		return false;
 	}
 }

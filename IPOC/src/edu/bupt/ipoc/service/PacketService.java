@@ -2,11 +2,10 @@ package edu.bupt.ipoc.service;
 
 import java.util.List;
 
-public class PacketService extends Service{
+public class PacketService extends Service implements Comparable<PacketService>{
 
 	//End to end service request, to be carried or removed
 	//public static int CARRIED_REQUEST = 1;
-	public static int REMOVED_REQUEST = 2;
 	
 	public static final int STATIC_CARRIED = 1;
 	public static final int DYNAMICALLY_CARRIED_AND_INDIVISIBLE = 2;
@@ -86,6 +85,12 @@ public class PacketService extends Service{
 	{
 		carriedVTL = null;
 		//TODO
+	}
+
+	@Override
+	public int compareTo(PacketService o) {
+		// TODO Auto-generated method stub
+		return o.priority - this.priority;
 	}
 
 }

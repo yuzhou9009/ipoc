@@ -10,6 +10,7 @@ import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.BandwidthTolerantPacketService;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
+import edu.bupt.ipoc.service.SubBTService;
 
 public class PacketServiceManager{
 	
@@ -41,8 +42,9 @@ public class PacketServiceManager{
 	}
 
 	public boolean deleteService(PacketService ss) {
-		// TODO Auto-generated method stub
-		return false;
+		vertex_pair_ps_map.get(new Pair<Integer,Integer>(ss.sourceNode, ss.destNode)).remove(ss);
+		
+		return true;
 	}
 
 	public boolean clearAllServices() {
@@ -122,5 +124,30 @@ public class PacketServiceManager{
 			List<Pair<Service, Integer>> shringked_vtls) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void updateBTServicesStatue() {
+		List<PacketService> remove_ps_list = new ArrayList<PacketService>();
+		
+		for(List<PacketService> _psl : vertex_pair_ps_map.values())
+		{
+			for(PacketService ps : _psl)
+			{
+				if(ps instanceof BandwidthTolerantPacketService)
+				{
+					if(((BandwidthTolerantPacketService)ps).checkStatue() == Service.NEED_TO_BE_REMOVED)
+					{
+						remove_ps_list.add(ps);
+					}					
+				}
+			}
+		}
+		if(remove_ps_list.size() > 0)
+		{
+			for(PacketService ps : remove_ps_list)
+			{
+				bc.handleServiceRequest(ps, Service.PS_REMOVED_REQUEST, null);
+			}
+		}
 	}
 }

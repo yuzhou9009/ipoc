@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import edu.asu.emit.qyan.alg.model.Path;
 
-public class OpticalService extends Service {
+public class OpticalService extends Service implements Comparable<OpticalService>{
 
 	public static final int BUILD_REQUEST = 1;
 	public static final int DELETE_RELEASE = 2;
@@ -141,6 +141,12 @@ public class OpticalService extends Service {
 		}
 		else
 			System.out.println("This optical service can not be used to offer sub otn, just check!!");
+		return 0;
+	}
+
+	@Override
+	public int compareTo(OpticalService o) {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 }

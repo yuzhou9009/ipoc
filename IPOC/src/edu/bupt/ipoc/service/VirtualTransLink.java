@@ -1,13 +1,14 @@
 package edu.bupt.ipoc.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import edu.bupt.ipoc.constraint.Constraint;
 import edu.bupt.ipoc.service.*;
 
-public class VirtualTransLink extends Service{
+public class VirtualTransLink extends Service implements Comparable<VirtualTransLink>{
 	
 	public static final int BUILD_REQUEST = 1;
 	public static final int REMOVE_REQUEST = 2;
@@ -360,7 +361,7 @@ public class VirtualTransLink extends Service{
 			return NOT_NEED_ADJUSTED; 
 		
 		else if(this.type == VTL_BOD)
-		{
+		{			
 			if(isBeyondUpperThreshold(NO_CORRECTION))
 			{
 				return NEED_TO_BE_EXTENDED;
@@ -373,6 +374,16 @@ public class VirtualTransLink extends Service{
 					//TODO Later If this is a service with low priority, we should do the adjustment.
 					return NOT_NEED_ADJUSTED;
 				}
+				if(this.vtl_priority == Service.PRIORITY_LOW)
+				{
+					if(this.relevantOTNServices != null && this.relevantOTNServices.size() > 0)
+					{
+						if((this.bw_capacity- (int)(getUsedBWofVTLByAllPacketServices()/th_usp_low))/Service.BW_1G > 0)
+						{
+							return NEED_TO_BE_SHRINKED;
+						}
+					}
+				}				
 				return NEED_TO_BE_SHRINKED;
 			}
 			else
@@ -453,8 +464,6 @@ public class VirtualTransLink extends Service{
 	}
 	
 	public int howManyMoreBwNeeded() {
-		// TODO Auto-generated method stub
-		
 		return (int) (BW_1G * getCurrentHighThresholdValue())-1;
 	}
 	
@@ -471,19 +480,43 @@ public class VirtualTransLink extends Service{
 	public List<Service> servicesNeededToRemove() 
 	{
 		List<Service> ls = new ArrayList<Service>();
-		//GET ALL CIRCUIT,		
-		//max number of circuit needed to be removed
-		//find the longest circuit/s.
-		// TODO
-		//TODO
-		if(this.relevantOTNServices.size()>1)
-			ls.add(this.relevantOTNServices.get(this.relevantOTNServices.size()-1));
-		else if(this.relevantOpticalServices.size()>1)
+		
+		if(this.vtl_priority == Service.PRIORITY_LOW)
 		{
-			//TODO
-			//System.out.println("This should not happen Now! In servicesNeededToRemove");
-		}
+			if(this.relevantOTNServices != null && this.relevantOTNServices.size()>0)
+			{
+				int max_num = (this.bw_capacity- (int)(getUsedBWofVTLByAllPacketServices()/th_usp_low))/Service.BW_1G;
+				
+				int tem = max_num < this.relevantOTNServices.size()?max_num:this.relevantOTNServices.size();
+				Collections.sort(this.relevantOTNServices);
+				for(int i = 0;i<tem;i++)
+				{
+					ls.add(this.relevantOTNServices.get(i));
+				}
+				if(max_num - this.relevantOTNServices.size() >= Service.BW_10G/Service.BW_1G)
+				{
+					if(this.relevantOpticalServices.size() > 1)
+					{
+						Collections.sort(this.relevantOpticalServices);
+						ls.add(this.relevantOpticalServices.get(this.relevantOpticalServices.size() - 1));
+					}						
+				}
+			}
 			
+		}
+		else
+		{
+			//remove the last number of circuit, remove the circuit which are not in the same optical service.
+			//TODO may be needed to remove more
+			//sort
+			if(this.relevantOTNServices.size()>1)
+				ls.add(this.relevantOTNServices.get(this.relevantOTNServices.size()-1));
+			else if(this.relevantOpticalServices.size()>1)
+			{
+				//System.out.println("This should not happen Now! In servicesNeededToRemove");
+			}
+			
+		}			
 		return ls;
 	}
 	
@@ -503,7 +536,7 @@ public class VirtualTransLink extends Service{
 		int request_bw = 0;
 		for(PacketService _ps : carriedPacketServices)
 		{
-			describtion += "\n\t\t ps id:"+_ps.id+"\t the request bw is:"+_ps.getCurrentOccupiedBw();
+			describtion += "\n\t\t ps id:"+_ps.id+" ps priority:"+_ps.priority+"\t the request bw is:"+_ps.getCurrentOccupiedBw();
 			//TODO
 //			if(_ps.f_child == true)
 //				describtion += "\t it is a ps child, his father id:"+_ps.father_ps.id;
@@ -563,5 +596,12 @@ public class VirtualTransLink extends Service{
 		else
 				System.out.println("Never be here!");
 		return null;
+	}
+
+	@Override
+	public int compareTo(VirtualTransLink o) {
+		// TODO Auto-generated method stub
+		//TODO
+		return 0;
 	}
 }

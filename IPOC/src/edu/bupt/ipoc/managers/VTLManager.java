@@ -1,6 +1,7 @@
 package edu.bupt.ipoc.managers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class VTLManager{
 					}
 					else if(last_option_vtls.size()>0)
 					{
-						//TODO later todo, sort the list.
+						Collections.sort(last_option_vtls);
 						for(VirtualTransLink _vtl : last_option_vtls)
 						{
 							Map<Integer,Constraint> _cons = new HashMap<Integer,Constraint>();
@@ -146,17 +147,23 @@ public class VTLManager{
 						canOfferBW = vtl.getAcutallyRestBWforShare();//getAcutallyRestBW();
 						if(canOfferBW > 0)
 						{
-							allRequestBW -= canOfferBW;
-							tem_vtll.add(new Pair(vtl,canOfferBW));
-							if(allRequestBW <= 0)
+							if(allRequestBW > canOfferBW)
 							{
+								allRequestBW -= canOfferBW;
+								tem_vtll.add(new Pair(vtl,canOfferBW));
+							}
+							else
+							{
+								tem_vtll.add(new Pair(vtl,allRequestBW));
 								return tem_vtll;
 							}
 						}
 						else if(canOfferBW == 0)
 							;
 						else
-							System.out.println("There must be some big mistake!! the canOfferBW is:"+canOfferBW);
+						{
+							System.out.println("1There must be some big mistake!! the canOfferBW is:"+canOfferBW);
+						}
 					}
 				}
 				if(allRequestBW > 0)
@@ -168,17 +175,21 @@ public class VTLManager{
 							canOfferBW = vtl.getAcutallyRestBWforShare();
 							if(canOfferBW > 0)
 							{
-								allRequestBW -= canOfferBW;
-								tem_vtll.add(new Pair(vtl,canOfferBW));
-								if(allRequestBW <= 0)
+								if(allRequestBW > canOfferBW)
 								{
+									allRequestBW -= canOfferBW;
+									tem_vtll.add(new Pair(vtl,canOfferBW));
+								}
+								else
+								{
+									tem_vtll.add(new Pair(vtl,allRequestBW));
 									return tem_vtll;
 								}
 							}
 							else if(canOfferBW == 0)
 								;
 							else
-								System.out.println("There must be some big mistake!! the canOfferBW is:"+canOfferBW);
+								System.out.println("2There must be some big mistake!! the canOfferBW is:"+canOfferBW);
 						}
 					}
 				}
@@ -229,7 +240,7 @@ public class VTLManager{
 	}
 
 	public boolean deleteService(VirtualTransLink vtl) {
-		//TODO Auto-generated method stub
+		//TODO
 		System.out.println("Not done yet!");
 		return false;
 	}
@@ -340,7 +351,6 @@ public class VTLManager{
 		
 		for(VirtualTransLink vtl : extended_vtl_list)
 		{
-			//TODO Add cons of bw
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			int _tem_extend_bw = -1;
 			
@@ -355,17 +365,21 @@ public class VTLManager{
 					adjusted_vtl_list.add(vtl);
 			}
 			else
+			{
+				
 				System.out.println("Extend not success!!!");
+				bc.handleServiceRequest(vtl, VirtualTransLink.EXTEND_REQUEST, consmp);
+			}
 		}
 		
 		for(VirtualTransLink vtl : adjusted_vtl_list)
 		{
-			int adjust_bw_value = 0;
-			//TODO calulate
-			//TODO
-			//TODO
-			
-			//bc.handleServiceRequest(t_vtl, VirtualTransLink.ADJUST_PSS_REQUEST, cons));
+			int adjust_bw_value = 0 - vtl.getAcutallyRestBWforShareNoLimit();
+			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
+
+			consmp.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,adjust_bw_value,"vtl's request adjust bw:"+adjust_bw_value));
+
+			bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp);
 			
 			//adjustBwAllocationOfBTServices(vtl,adjust_bw_value);
 		}	

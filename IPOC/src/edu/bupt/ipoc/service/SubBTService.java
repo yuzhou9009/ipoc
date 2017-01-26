@@ -1,6 +1,6 @@
 package edu.bupt.ipoc.service;
 
-public class SubBTService extends PacketService{
+public class SubBTService extends PacketService implements Comparable<PacketService>{
 	
 
 	public int static_bw = 0;
@@ -11,11 +11,9 @@ public class SubBTService extends PacketService{
 		static_bw = _static_bw;
 		father_btps = _father_btps;
 		carriedVTL = _carried_VTL;
-		// TODO Auto-generated constructor stub
 	}
 
 	public int bwCanShrinked() {
-		// TODO Auto-generated method stub
 		int tem = this.father_btps.maxBWCanBeShrinked();
 		
 		if(static_bw > tem)
@@ -23,9 +21,13 @@ public class SubBTService extends PacketService{
 		else 
 			return static_bw;
 	}
+	
+	public int getCurrentOccupiedBw()
+	{
+		return this.static_bw;
+	}
 
-	public void shrinkItself(int request_bw) {
-		// TODO Auto-generated method stub
+	public boolean shrinkItself(int request_bw) {
 		if(request_bw > static_bw)
 			System.out.println("Bad input in SubBTService, check");
 		else if(request_bw < static_bw)
@@ -34,9 +36,35 @@ public class SubBTService extends PacketService{
 			this.father_btps.updateCurrent_rate();
 		}
 		else
-		{
-			this.father_btps.removeSubBTService(this);
-		}
+			return true;
+		return false;
 	}
 
+	@Override
+	public int compareTo(PacketService arg0) {
+		if(arg0 instanceof SubBTService)
+			return this.father_btps.compareTo(((SubBTService)arg0).father_btps);
+		else
+			return super.compareTo(arg0);
+	}
+
+	public int bwCanExpended() {
+		int tem = this.father_btps.maxBWCanBeExpended();
+		
+		return tem;
+	}
+
+	public void expendItself(int tem) {
+		this.static_bw += tem;
+		
+	}
+	
+	public String toString(){
+		
+		String describtion = new String();
+		
+		describtion += "id" + this.id;
+		describtion += "\t static bw" + this.static_bw;
+		return describtion;
+	}
 }

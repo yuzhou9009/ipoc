@@ -63,7 +63,6 @@ public class VTLRequestHandler{
 						if(_tem != null)
 						{
 							bc.mappingServices(vtl, _tem, null);
-							//TODO
 							return true;
 						}
 					}
@@ -77,8 +76,6 @@ public class VTLRequestHandler{
 						return true;
 					}
 				}
-				
-				
 			}
 		}
 		else if(command == VirtualTransLink.EXTEND_REQUEST)
@@ -108,7 +105,6 @@ public class VTLRequestHandler{
 		}
 		else if(command == VirtualTransLink.SHRINKED_REQUEST)
 		{
-			//TODO
 			List<Service> _tems = vtl.servicesNeededToRemove();
 			bc.unmappingServices(vtl,_tems,null);
 			return true;

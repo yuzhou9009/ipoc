@@ -1,6 +1,6 @@
 package edu.bupt.ipoc.service;
 
-public class OTNService extends Service{
+public class OTNService extends Service implements Comparable<OTNService>{
 		
 	public static final int OTN_1G = 1;
 	public static final int ODU0 = 1;
@@ -37,6 +37,12 @@ public class OTNService extends Service{
 	public int getBWCapacity() {
 		
 		return 1000;
+	}
+
+	@Override
+	public int compareTo(OTNService o) {
+		
+		return (int)(this.osBelongTo.path.get_weight() - o.osBelongTo.path.get_weight());
 	}
 
 }
