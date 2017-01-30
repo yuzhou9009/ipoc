@@ -7,6 +7,7 @@ import edu.bupt.ipoc.constraint.Constraint;
 import edu.bupt.ipoc.controller.CentralizedController;
 import edu.bupt.ipoc.service.BandwidthTolerantPacketService;
 import edu.bupt.ipoc.service.BestEffortPacketService;
+import edu.bupt.ipoc.service.OpticalService;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
 import edu.bupt.ipoc.service.ServiceGenerator;
@@ -149,7 +150,12 @@ public class IPOC {
 							consmp.put(Constraint.VTL_CARRY_TYPE_C, 
 									new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.VTL_BOD, "The vtl can be extended and shared!"));
 							
-							cc.handleServiceRequest(btpsl.get(bt_service_count), Service.PS_CARRIED_REQUEST, consmp);
+							if(!cc.handleServiceRequest(btpsl.get(bt_service_count), Service.PS_CARRIED_REQUEST, consmp))
+							{
+								List<OpticalService> osl = cc.osm.getAllOpticalService();
+								for(OpticalService os : osl)
+									System.out.println(""+os);
+							}
 							count_for_next_service = time_interval_list[bt_service_count];
 							count_for_next_service --;
 							bt_service_count++;

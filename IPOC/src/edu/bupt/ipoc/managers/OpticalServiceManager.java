@@ -43,7 +43,12 @@ public class OpticalServiceManager{
 		
 		List<OpticalService> _osl = vertex_pair_os_map.get(new Pair<Integer,Integer>(os.sourceVertex,os.sinkVertex));
 		if(_osl != null && _osl.size() > 0)
-			return _osl.remove(os);
+		{
+			if(_osl.remove(os))
+				return bc.handleServiceRequest(os, OpticalService.DELETE_RELEASE, null);
+			else
+				System.out.println("big mistake");
+		}
 		return false;
 	}
 	

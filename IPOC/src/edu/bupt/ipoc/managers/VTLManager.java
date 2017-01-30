@@ -396,7 +396,6 @@ public class VTLManager{
 			if(!bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp))
 			{
 				System.out.println("Never think about this");
-				bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp);
 			}
 			
 			//adjustBwAllocationOfBTServices(vtl,adjust_bw_value);

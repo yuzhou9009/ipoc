@@ -224,7 +224,6 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 			{
 				double _tem = 1.0/getCurrentHighThresholdValue();
 				
-				//TODO NEED MODIFY
 				if(((getUsedBWofVTLByAllPacketServices() + _bw) / th_usp_low <= getCapacity()) 
 						&& ((getUsedBWofVTLByPrimaryPacketServices()+ _bw) * _tem <= getCapacity()))
 				{
@@ -237,8 +236,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	
 	public boolean canOfferMoreBwWithAdjustment(int _bw)
 	{
-		//TODO NEED MODIFY
-		if((getUsedBWofVTLByAllPacketServices() + _bw) / getCurrentHighThresholdValue() <= getCapacity())
+		if((getUsedBWofVTLByPrimaryPacketServices() + _bw) / getCurrentHighThresholdValue() <= getCapacity())
 		{
 			return true;
 		}
@@ -415,7 +413,6 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	}
 
 	private boolean isNoServiceAnymore() {
-		// TODO Auto-generated method stub
 		if(this.getUsedBWofVTLByAllPacketServices() == 0)
 			return true;
 		return false;
@@ -544,7 +541,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 				ls.add(this.relevantOTNServices.get(this.relevantOTNServices.size()-1));
 			else if(this.relevantOpticalServices.size()>1)
 			{
-				//System.out.println("This should not happen Now! In servicesNeededToRemove");
+				System.out.println("This should not happen Now! In servicesNeededToRemove");
 			}
 			
 		}			
@@ -629,6 +626,6 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public int compareTo(VirtualTransLink o) {
 		// TODO Auto-generated method stub
 		//TODO
-		return 0;
+		return o.getRestBW() - this.getRestBW();
 	}
 }
