@@ -36,7 +36,7 @@ public class OTNService extends Service implements Comparable<OTNService>{
 
 	public int getBWCapacity() {
 		
-		return 1000;
+		return BW_1G;
 	}
 
 	@Override

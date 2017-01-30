@@ -1,7 +1,5 @@
 package edu.bupt.ipoc.service;
 
-import java.util.List;
-
 public class PacketService extends Service implements Comparable<PacketService>{
 
 	//End to end service request, to be carried or removed
@@ -89,7 +87,6 @@ public class PacketService extends Service implements Comparable<PacketService>{
 
 	@Override
 	public int compareTo(PacketService o) {
-		// TODO Auto-generated method stub
 		return o.priority - this.priority;
 	}
 

@@ -52,6 +52,8 @@ public class VTLManager{
 							continue;
 						else if(vtl_carry_type_c.value == VirtualTransLink.STATIC_BUT_SHARED)
 						{
+							if(vtl.vtl_priority != Service.PRIORITY_LOW && vtl.vtl_priority!= cons.get(Constraint.PRIORITY_C).value)
+								continue;
 							if(vtl.canOfferMoreBW(init_bw_c.value))
 								return vtl;
 						}
@@ -95,7 +97,10 @@ public class VTLManager{
 						consmp.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,init_bw_c.value - t_vtl.getRestBW(),"adjustment request bw:"+(init_bw_c.value - t_vtl.getRestBW())));
 					
 						if(!bc.handleServiceRequest(t_vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp))
+						{
+							System.out.println("SHIBAI");
 							return null;
+						}
 					}
 					else if(last_option_vtls.size()>0)
 					{
@@ -150,11 +155,11 @@ public class VTLManager{
 							if(allRequestBW > canOfferBW)
 							{
 								allRequestBW -= canOfferBW;
-								tem_vtll.add(new Pair(vtl,canOfferBW));
+								tem_vtll.add(new Pair<Service, Integer>(vtl,canOfferBW));
 							}
 							else
 							{
-								tem_vtll.add(new Pair(vtl,allRequestBW));
+								tem_vtll.add(new Pair<Service, Integer>(vtl,allRequestBW));
 								return tem_vtll;
 							}
 						}
@@ -178,11 +183,11 @@ public class VTLManager{
 								if(allRequestBW > canOfferBW)
 								{
 									allRequestBW -= canOfferBW;
-									tem_vtll.add(new Pair(vtl,canOfferBW));
+									tem_vtll.add(new Pair<Service, Integer>(vtl,canOfferBW));
 								}
 								else
 								{
-									tem_vtll.add(new Pair(vtl,allRequestBW));
+									tem_vtll.add(new Pair<Service, Integer>(vtl,allRequestBW));
 									return tem_vtll;
 								}
 							}
@@ -240,7 +245,11 @@ public class VTLManager{
 	}
 
 	public boolean deleteService(VirtualTransLink vtl) {
-		//TODO
+		List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer,Integer>(vtl.sourceVertex,vtl.destVertex));
+		
+		if(vtll != null && vtll.size() > 0)
+			return vtll.remove(vtl);
+		
 		System.out.println("Not done yet!");
 		return false;
 	}
@@ -311,30 +320,35 @@ public class VTLManager{
 		List<VirtualTransLink> shrinked_vtl_list = new ArrayList<VirtualTransLink>();
 		List<VirtualTransLink> extended_vtl_list = new ArrayList<VirtualTransLink>();
 		List<VirtualTransLink> adjusted_vtl_list = new ArrayList<VirtualTransLink>();
+		//List<VirtualTransLink> removed_vtl_list = new ArrayList<VirtualTransLink>();
 		
 		for(VirtualTransLink vtl : getAllVTLs())
 		{
 			vtl.updateBwStatistics();
 			currentStatue = vtl.getCurrentStatue();
-			if(currentStatue == VirtualTransLink.NEED_TO_BE_ADJUSTED)
+			if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_ADJUSTED)
 			{
 				adjusted_vtl_list.add(vtl);
 				//System.out.println("NEED_TO_BE_ADJUSTED");
 			}
-			else if(currentStatue == VirtualTransLink.NEED_TO_BE_EXTENDED)
+			else if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_EXTENDED)
 			{
 				extended_vtl_list.add(vtl);
 				//System.out.println("NEED_TO_BE_EXTENDED");
 			}
-			else if(currentStatue == VirtualTransLink.NEED_TO_BE_SHRINKED)
+			else if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_SHRINKED)
 			{
 				shrinked_vtl_list.add(vtl);
 				//System.out.println("NEED_TO_BE_SHRINKED");
 			}
+			else if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_REMOVED)
+			{
+				;//TODO. Not decided yet.
+			}	
 			else
 			{
 				//do nothing.
-			}		
+			}
 		}
 
 		for(VirtualTransLink vtl : shrinked_vtl_list)
@@ -342,7 +356,7 @@ public class VTLManager{
 			if(bc.handleServiceRequest(vtl, VirtualTransLink.SHRINKED_REQUEST, null))
 			{
 				currentStatue = vtl.getCurrentStatue();
-				if(currentStatue == VirtualTransLink.NEED_TO_BE_ADJUSTED)
+				if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_ADJUSTED)
 					adjusted_vtl_list.add(vtl);
 			}
 			else
@@ -361,7 +375,7 @@ public class VTLManager{
 			if(bc.handleServiceRequest(vtl, VirtualTransLink.EXTEND_REQUEST, consmp))
 			{
 				currentStatue = vtl.getCurrentStatue();
-				if(currentStatue == VirtualTransLink.NEED_TO_BE_ADJUSTED)
+				if(currentStatue == VirtualTransLink.VTL_NEED_TO_BE_ADJUSTED)
 					adjusted_vtl_list.add(vtl);
 			}
 			else
@@ -379,7 +393,11 @@ public class VTLManager{
 
 			consmp.put(Constraint.INITBW_C, new Constraint(Constraint.INITBW_C,adjust_bw_value,"vtl's request adjust bw:"+adjust_bw_value));
 
-			bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp);
+			if(!bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp))
+			{
+				System.out.println("Never think about this");
+				bc.handleServiceRequest(vtl, VirtualTransLink.ADJUST_PSS_REQUEST, consmp);
+			}
 			
 			//adjustBwAllocationOfBTServices(vtl,adjust_bw_value);
 		}	

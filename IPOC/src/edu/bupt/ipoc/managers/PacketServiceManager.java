@@ -1,6 +1,7 @@
 package edu.bupt.ipoc.managers;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +42,13 @@ public class PacketServiceManager{
 		return false;
 	}
 
-	public boolean deleteService(PacketService ss) {
-		vertex_pair_ps_map.get(new Pair<Integer,Integer>(ss.sourceNode, ss.destNode)).remove(ss);
+	public boolean deleteService(PacketService ss) 
+	{
+		List<PacketService> psl = vertex_pair_ps_map.get(new Pair<Integer,Integer>(ss.sourceNode, ss.destNode));
 		
+		if(psl != null && psl.size() > 0)
+			return psl.remove(ss);
+		System.out.println("Wrong no existing packetservice");
 		return true;
 	}
 
@@ -61,7 +66,6 @@ public class PacketServiceManager{
 	
 	public List<Pair<Service, Integer>> shrinkedPSforMoreBW(int _source, int _dest, int differ_bw)
 	{
-		//TODO
 		List<PacketService> _psl = vertex_pair_ps_map.get(new Pair<Integer,Integer>(_source, _dest));
 		
 		List<BandwidthTolerantPacketService> tem_psl = new ArrayList<BandwidthTolerantPacketService>();
@@ -74,11 +78,12 @@ public class PacketServiceManager{
 			}
 		}
 		
-		//sort
+		Collections.sort(tem_psl);
+		Collections.reverse(tem_psl);
+		
 		int rest_bw = differ_bw;
 		int tem_bw = 0;
-		List<BandwidthTolerantPacketService> wait_btpsl = new ArrayList<BandwidthTolerantPacketService>();
-		
+
 		List<Pair<Service,Integer>> wait_ps = new ArrayList<Pair<Service,Integer>>();
 		
 		for(BandwidthTolerantPacketService btps : tem_psl)
@@ -100,7 +105,6 @@ public class PacketServiceManager{
 		
 		if(rest_bw <= 0)
 		{
-			//List<Service> resutls = new ArrayList<Service>();
 			List<Pair<Service,Integer>> results = new ArrayList<Pair<Service,Integer>>();
 			
 			List<Pair<Service,Integer>> shringked_vtls;
@@ -111,10 +115,12 @@ public class PacketServiceManager{
 				tem = (BandwidthTolerantPacketService)(pair.o1);
 				shringked_vtls = tem.shrinkedWithBW(pair.o2);
 				if(shringked_vtls != null)
-					combineServicesWithBw(results,shringked_vtls);
+					results.addAll(shringked_vtls);
 				else
 					System.out.println("Big mistake");
 			}
+			
+			return results;
 		}
 		//else		
 		return null;
@@ -123,7 +129,7 @@ public class PacketServiceManager{
 	private void combineServicesWithBw(List<Pair<Service, Integer>> results,
 			List<Pair<Service, Integer>> shringked_vtls) {
 		// TODO Auto-generated method stub
-		
+		//NOT necessary		
 	}
 
 	public void updateBTServicesStatue() {
@@ -135,7 +141,7 @@ public class PacketServiceManager{
 			{
 				if(ps instanceof BandwidthTolerantPacketService)
 				{
-					if(((BandwidthTolerantPacketService)ps).checkStatue() == Service.NEED_TO_BE_REMOVED)
+					if(((BandwidthTolerantPacketService)ps).checkStatue() == Service.BTPS_NEED_TO_BE_REMOVED)
 					{
 						remove_ps_list.add(ps);
 					}					

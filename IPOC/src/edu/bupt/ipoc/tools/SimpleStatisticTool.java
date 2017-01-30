@@ -102,8 +102,8 @@ public class SimpleStatisticTool implements Tool {
 		
 		for(VirtualTransLink vtl : vtls)
 			_bw_all += vtl.getCapacity();
-		System.out.println("Total occupied bw is :"+_bw_all);
-		System.out.println("Total vtl count is :"+vtls.size());
+		//System.out.println("Total occupied bw is :"+_bw_all);
+		//System.out.println("Total vtl count is :"+vtls.size());
 		return _bw_all;		
 	}
 }

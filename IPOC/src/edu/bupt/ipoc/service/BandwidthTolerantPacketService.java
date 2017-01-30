@@ -15,7 +15,7 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 	public int rest_data_to_be_transfered = 0;
 	public int rest_time_long = 0; //the initial value is scheduled time long.
 	public int max_extra_time_long = 0;//if needed, it can be reset after the packet service was generated.
-	public int max_transfer_rate = BW_10G;//if the service type is TYPE_LIMITATION, this parameter may be reset.
+//	public int max_transfer_rate = (int)(BW_10G * Service.TH_USP_LOW) - 1;//if the service type is TYPE_LIMITATION, this parameter may be reset.
 	public int current_rate = 0;
 
 //	public boolean has_child = false;
@@ -70,16 +70,19 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 		if(o instanceof BandwidthTolerantPacketService)
 			return this.rest_time_long - ((BandwidthTolerantPacketService)o).rest_time_long;
 		else
+		{
+			System.out.println("Should not be here");
 			return super.compareTo(o);
+		}
 	}
 
 	public int maxBWCanBeShrinked() {
 		int tem =  current_rate - rest_data_to_be_transfered/rest_time_long - 1;
-		//TODO NEED TO BE TESTED
 		if(tem >= Service.MIN_SHARED_BW_GRANULARITY)
 			return tem;
-		else
-			return 0;
+		else if(tem < -1)
+			System.out.println("BTPS MAX bw can be shrinked, wrong result"+tem);
+		return 0;
 	}
 	
 
@@ -95,7 +98,7 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 		List<SubBTService> removed_list = new ArrayList<SubBTService>();
 		
 		int rest_request_bw = o2;
-		Collections.sort(this.sub_btpss);
+		Collections.reverse(this.sub_btpss);
 		
 		for(SubBTService ss : this.sub_btpss)
 		{
@@ -119,8 +122,7 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 			for(SubBTService removed_subbt : removed_list)
 			{
 				removed_subbt.carriedVTL.removeCarriedPacketService(removed_subbt);
-				//TODO UNMAPPING
-				removed_subbt.father_btps.removeSubBTService(removed_subbt);//unmapping
+				removed_subbt.father_btps.removeSubBTService(removed_subbt);
 			}
 		}
 		if(target_vtls.size() > 0)
@@ -146,18 +148,20 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 		rest_time_long -= Service.TIME_STEP;
 		
 		if(rest_data_to_be_transfered <= 0)
-			return NEED_TO_BE_REMOVED;
+			return BTPS_NEED_TO_BE_REMOVED;
 		else if(rest_time_long == 0)
 		{
 			System.out.println("rest_data:"+ rest_data_to_be_transfered);
 		}
 		
-		return STILL_RUNNING;
+		return BTPS_STILL_RUNNING;
 	}
 
 	public String toString()
 	{
 		String describtion = new String();
+		
+		describtion +="BTPS, id:"+this.id+". Current bw :"+this.current_rate+"\n";
 		
 		if(this.sub_btpss != null && this.sub_btpss.size() > 0)
 		{

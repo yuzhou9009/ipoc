@@ -1,6 +1,5 @@
 package edu.bupt.ipoc.handler;
 
-import java.util.List;
 import java.util.Map;
 
 import edu.bupt.ipoc.constraint.Constraint;

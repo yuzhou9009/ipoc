@@ -25,12 +25,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public static final int STATIC_BUT_SHARED = 1;
 	public static final int DYNAMIC_AND_SHARED_BUT_CONFILICTING = 2;//traditional;vtl can be shared with other services, but once the bw is not enough, it will caused conflict, then the affiliated service need to move to other vtl or need a new vtl for being carried.
 	public static final int VTL_BOD = 3;
-	
-	public static final int NOT_NEED_ADJUSTED = 0;
-	public static final int NEED_TO_BE_ADJUSTED = 1;//No need to be extended but adjusted
-	public static final int NEED_TO_BE_EXTENDED = 2;
-	public static final int NEED_TO_BE_SHRINKED = 3;
-	
+		
 	public static final double TH_USP_HIGH = 0.80;
 	public static final double TH_USP_MID = 0.85;
 	public static final double TH_USP_LOW = 0.95;
@@ -64,7 +59,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public int primary_service_bw_current = BW_EMPTY;
 	public int all_service_bw_current = BW_EMPTY;
 	
-	public List<PacketService> carriedPacketServices = null;
+	private List<PacketService> carriedPacketServices = null;
 	
 	public List<OTNService> relevantOTNServices = null;
 	public List<OpticalService> relevantOpticalServices = null;
@@ -119,13 +114,13 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public void addRelevantOpticalService(OpticalService _os)
 	{
 		this.relevantOpticalServices.add(_os);		
-		this.updateCapacity();
+		this.updateBwStatistics();
 	}
 	
 	public void addRelevantOTNService(OTNService _otns)
 	{
 		this.relevantOTNServices.add(_otns);		
-		this.updateCapacity();
+		this.updateBwStatistics();
 	}
 	
 	public int updateCapacity()
@@ -151,6 +146,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 		bw_capacity = _bw_capacity;
 		return bw_capacity;		
 	}
+	
 	
 	public void updateBwStatistics()
 	{
@@ -216,7 +212,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 			}
 			else if(this.type == VirtualTransLink.STATIC_BUT_SHARED)
 			{
-				if((getUsedBWofVTLByAllPacketServices() + _bw) * SURVIVABILITY_FACTOR <= getCapacity())
+				if((getUsedBWofVTLByAllPacketServices() + _bw) <= getCapacity())
 					return true;
 			}
 			else if(this.type == DYNAMIC_AND_SHARED_BUT_CONFILICTING)
@@ -262,7 +258,7 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 			return (int)(getCapacity() * REGULAR_UPPER_THRESHOLD) - getUsedBWofVTLByAllPacketServices();
 		else
 			System.out.println("Never would be here!");
-		return (int)(getCapacity() * REGULAR_UPPER_THRESHOLD) - getUsedBWofVTLByAllPacketServices();
+		return getCapacity() - getUsedBWofVTLByAllPacketServices();
 	}
 	
 	public int getAcutallyRestBWforShare()
@@ -287,23 +283,27 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public void removeRelevantOpticalService(OpticalService _os)
 	{
 		this.relevantOpticalServices.remove(_os);
+		this.updateCapacity();
 		//this.allBW += _os.get
 	}
 	
 	public void removeRelevantOTNService(OTNService _otns)
 	{
 		this.relevantOTNServices.remove(_otns);
+		this.updateCapacity();
 		//this.allBW += _os.get
 	}
 	
 	public void addPacketServiceToCarry(PacketService _ps)
 	{
 		this.carriedPacketServices.add(_ps);
+		updateBwStatistics();
 	}
 	
 	public void removeCarriedPacketService(PacketService _ps)
 	{
 		this.carriedPacketServices.remove(_ps);
+		updateBwStatistics();
 	}
 	
 	public int getUsedBWofVTLByAllPacketServices()
@@ -358,39 +358,52 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 	public int getCurrentStatue() 
 	{
 		if(this.type == STATIC_AND_NOT_SHARED || this.type == STATIC_BUT_SHARED)
-			return NOT_NEED_ADJUSTED; 
+			return VTL_NOT_NEED_ADJUSTED; 
 		
 		else if(this.type == VTL_BOD)
 		{			
 			if(isBeyondUpperThreshold(NO_CORRECTION))
 			{
-				return NEED_TO_BE_EXTENDED;
+				return VTL_NEED_TO_BE_EXTENDED;
 			}
 			else if(isUnderLowerThreshold(NO_CORRECTION))
 			{
-				if(circuitNumber() == 1)
+				if(this.vtl_priority != Service.PRIORITY_LOW)
 				{
-					//TODO System.out.println("This is a special conditions. May be extented!");
-					//TODO Later If this is a service with low priority, we should do the adjustment.
-					return NOT_NEED_ADJUSTED;
+					if(circuitNumber() == 1)
+					{
+						return VTL_NOT_NEED_ADJUSTED;
+					}
+					if(isNoServiceAnymore())
+						System.out.println("This really happens");
 				}
+				else
+				{
+					if(isNoServiceAnymore())
+					{
+						//TODO System.out.println("This is a special conditions. May be extented!");
+						//TODO Later If this is a service with low priority, we should do the adjustment.
+						;//TODO	//return VTL_NEED_TO_BE_REMOVED;
+					}
+				}								
+				return VTL_NEED_TO_BE_SHRINKED;
+			}
+			else
+			{
 				if(this.vtl_priority == Service.PRIORITY_LOW)
 				{
 					if(this.relevantOTNServices != null && this.relevantOTNServices.size() > 0)
 					{
 						if((this.bw_capacity- (int)(getUsedBWofVTLByAllPacketServices()/th_usp_low))/Service.BW_1G > 0)
 						{
-							return NEED_TO_BE_SHRINKED;
+							return VTL_NEED_TO_BE_SHRINKED;
 						}
 					}
-				}				
-				return NEED_TO_BE_SHRINKED;
-			}
-			else
-			{
+				}
+				
 				if(isWholeBwBeyondUpperThreshold(NO_CORRECTION) || isStateChangingUpperThreshold(NO_CORRECTION))
 				{
-					return NEED_TO_BE_ADJUSTED;
+					return VTL_NEED_TO_BE_ADJUSTED;
 				}
 			}	
 		}
@@ -398,7 +411,14 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 		{
 			//TODO Later
 		}			
-		return NOT_NEED_ADJUSTED;
+		return VTL_NOT_NEED_ADJUSTED;
+	}
+
+	private boolean isNoServiceAnymore() {
+		// TODO Auto-generated method stub
+		if(this.getUsedBWofVTLByAllPacketServices() == 0)
+			return true;
+		return false;
 	}
 
 	private boolean isBeyondUpperThreshold(int _correction) //only used after executing updateBwStatistics
@@ -502,7 +522,18 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 					}						
 				}
 			}
-			
+			else
+			{
+				int max_num = (this.bw_capacity- (int)(getUsedBWofVTLByAllPacketServices()/th_usp_low))/Service.BW_10G;
+				int list_size = this.relevantOpticalServices.size();
+				if(list_size - max_num == 0)
+					max_num --;
+				for(int i = 0; i < max_num ; i++)
+				{
+					ls.add(this.relevantOpticalServices.get(list_size - 1 -i));
+				}
+				
+			}	
 		}
 		else
 		{
@@ -554,10 +585,6 @@ public class VirtualTransLink extends Service implements Comparable<VirtualTrans
 		if(this.relevantOTNServices.size()>0)
 		{
 			describtion += "\n\tUsed otn num:"+relevantOTNServices.size();
-			if((relevantOTNServices.size()-1) * OTNService.BW_1G > request_bw)
-				;//System.out.println("************************************************************");
-			else if(relevantOTNServices.size() * OTNService.BW_1G < request_bw)
-				System.out.println("!!!!!!!!!!!!!!!!!!!Bug");
 			for(OTNService _otns : relevantOTNServices)
 			{
 				describtion += "\n\t\t otn id:"+_otns.id;

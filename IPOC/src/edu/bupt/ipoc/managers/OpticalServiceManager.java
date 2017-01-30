@@ -9,8 +9,6 @@ import edu.asu.emit.qyan.alg.model.Pair;
 import edu.asu.emit.qyan.alg.model.Path;
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.OpticalService;
-import edu.bupt.ipoc.service.Service;
-import edu.bupt.ipoc.service.VirtualTransLink;
 
 public class OpticalServiceManager{
 	
@@ -38,11 +36,14 @@ public class OpticalServiceManager{
 		else
 			vertex_pair_os_map.get(sd).add(os);
 		
-		return false;
+		return true;
 	}
 
 	public boolean deleteService(OpticalService os) {
-		// TODO Auto-generated method stub
+		
+		List<OpticalService> _osl = vertex_pair_os_map.get(new Pair<Integer,Integer>(os.sourceVertex,os.sinkVertex));
+		if(_osl != null && _osl.size() > 0)
+			return _osl.remove(os);
 		return false;
 	}
 	

@@ -1,9 +1,7 @@
 package edu.bupt.ipoc.service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import edu.asu.emit.qyan.alg.model.Path;
 
@@ -100,7 +98,7 @@ public class OpticalService extends Service implements Comparable<OpticalService
 			type = _type;
 			otn_children = new HashMap<Integer, OTNService>();
 		}
-		else if(_type == this.CHANNEL_10G_SINGLE)
+		else if(_type == CHANNEL_10G_SINGLE)
 		{
 			type = _type;
 		}
@@ -146,7 +144,7 @@ public class OpticalService extends Service implements Comparable<OpticalService
 
 	@Override
 	public int compareTo(OpticalService o) {
-		// TODO Auto-generated method stub
-		return 0;
+		
+		return this.path.compareTo(o.path);
 	}
 }

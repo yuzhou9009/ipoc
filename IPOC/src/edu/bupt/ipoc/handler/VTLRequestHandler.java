@@ -23,11 +23,11 @@ public class VTLRequestHandler{
 		{			
 			if(vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH || vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
 			{
-				Constraint initBW_c = null;
+				//Constraint initBW_c = null;
 				
 				if(cons != null && cons.size() > 0 && (cons.get(Constraint.INITBW_C) != null))
 				{
-					initBW_c = cons.get(Constraint.INITBW_C);
+					//initBW_c = cons.get(Constraint.INITBW_C);
 				}
 				else
 				{
@@ -114,7 +114,8 @@ public class VTLRequestHandler{
 			Constraint initBW_c = cons.get(Constraint.INITBW_C);;
 			int tem_bw = initBW_c.value;
 			
-			bc.adjustSpecificVTL(vtl, tem_bw);			
+			return bc.adjustSpecificVTL(vtl, tem_bw);	
+			
 		}
 
 		return false;

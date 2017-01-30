@@ -169,7 +169,7 @@ public class ServiceGenerator {
 	{
 		int[] timeIntervals = new int[packetService_num];
 		for(int i = 0; i<packetService_num;i++)
-			timeIntervals[i] = 10;
+			timeIntervals[i] = 20;
 		//TODO
 		
 		return timeIntervals;

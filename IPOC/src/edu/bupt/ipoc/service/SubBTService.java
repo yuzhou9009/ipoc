@@ -34,9 +34,14 @@ public class SubBTService extends PacketService implements Comparable<PacketServ
 		{
 			static_bw -= request_bw;
 			this.father_btps.updateCurrent_rate();
+			this.carriedVTL.updateBwStatistics();
 		}
 		else
+		{
+			static_bw -= request_bw;
+			this.father_btps.updateCurrent_rate();
 			return true;
+		}
 		return false;
 	}
 
@@ -56,6 +61,7 @@ public class SubBTService extends PacketService implements Comparable<PacketServ
 
 	public void expendItself(int tem) {
 		this.static_bw += tem;
+		this.father_btps.updateCurrent_rate();
 		
 	}
 	
@@ -65,6 +71,7 @@ public class SubBTService extends PacketService implements Comparable<PacketServ
 		
 		describtion += "id" + this.id;
 		describtion += "\t static bw" + this.static_bw;
+		describtion += "\t father btps rest time" + this.father_btps.rest_time_long;
 		return describtion;
 	}
 }

@@ -30,8 +30,8 @@ public class IPOC {
 	public IPOC()
 	{
 		topology = "Data/OpticalTopology/3Point";//nsfnetWeight";//networkdouble";
-		be_packet_num = 400;
-		bt_packet_num = 100;
+		be_packet_num = 100;
+		bt_packet_num = 10000;
 		one_day_time_slice = 24*60*60/Service.TIME_STEP;
 		time_multiple = one_day_time_slice/Service.TIME_BUCKET_NUM;
 		test_days = 5;
@@ -44,7 +44,7 @@ public class IPOC {
 		time_interval_list = sg.random_TimeIntervalList(bt_packet_num);
 		
 		cc = new CentralizedController(graph_G);
-		cc.f_debug_info = true;
+		cc.f_debug_info = false;
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////	
@@ -135,26 +135,34 @@ public class IPOC {
 				//for all running BT service, check their state
 				//If any service is out of date, remove it. do the adjustment.
 				//cc.em.checkEventList();
-				cc.psm.updateBTServicesStatue();
-				
-				if(count_for_next_service == 0)
+				if(t_day > 0)
 				{
-					if(bt_service_count < bt_packet_num)
+					cc.psm.updateBTServicesStatue();
+					
+					if(count_for_next_service == 0)
 					{
-						Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
-						consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
-								new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE, "The ps will be carried with vtl-bod!"));
-						consmp.put(Constraint.VTL_CARRY_TYPE_C, 
-								new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.VTL_BOD, "The vtl can be extended and shared!"));
-						
-						cc.handleServiceRequest(btpsl.get(bt_service_count), Service.PS_CARRIED_REQUEST, consmp);
-						count_for_next_service = time_interval_list[bt_service_count];
-						count_for_next_service --;
-						bt_service_count++;
+						if(bt_service_count < bt_packet_num)
+						{
+							Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
+							consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
+									new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.DYNAMICALLY_CARRIED_AND_DIVISIBLE, "The ps will be carried with vtl-bod!"));
+							consmp.put(Constraint.VTL_CARRY_TYPE_C, 
+									new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.VTL_BOD, "The vtl can be extended and shared!"));
+							
+							cc.handleServiceRequest(btpsl.get(bt_service_count), Service.PS_CARRIED_REQUEST, consmp);
+							count_for_next_service = time_interval_list[bt_service_count];
+							count_for_next_service --;
+							bt_service_count++;
+						}
+						else if(bt_service_count == bt_packet_num)
+						{
+							System.out.println("t_day:"+t_day+" be_time:"+be_time);
+							bt_service_count++;
+						}
 					}
+					else
+						count_for_next_service--;
 				}
-				else
-					count_for_next_service--;
 
 				if((time_slice_count % time_multiple) == 0)
 				{
@@ -164,8 +172,12 @@ public class IPOC {
 					}
 					
 					cc.checkVTLStatue();
-					System.out.print(be_time+":");
+					//System.out.print(be_time+":");
 					cc.sst.showOccupiedBwStatisticsOfAllVTLS(cc.vtlm.getAllVTLs());
+					//if(t_day == test_days-1 && (be_time == 20 || be_time == 200))
+					//{
+					//	cc.vtlm.showAllVirtualTransLink();
+					//}
 					be_time++;			
 				}
 			}

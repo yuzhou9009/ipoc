@@ -8,8 +8,6 @@ import java.util.Map;
 import edu.asu.emit.qyan.alg.model.Pair;
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.OTNService;
-import edu.bupt.ipoc.service.OpticalService;
-import edu.bupt.ipoc.service.Service;
 
 public class OTNServiceManager{
 	
@@ -43,7 +41,11 @@ public class OTNServiceManager{
 	}
 
 	public boolean deleteService(OTNService otns) {
-		// TODO Auto-generated method stub
+		List<OTNService> otnsl = vertex_pair_otns_map.get(new Pair<Integer,Integer>(otns.sourceVertex,otns.destVertex));
+		
+		if(otnsl != null && otnsl.size() > 0)
+			return otnsl.remove(otns);
+		
 		return false;
 	}
 

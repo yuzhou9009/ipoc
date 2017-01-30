@@ -41,7 +41,7 @@ import edu.asu.emit.qyan.alg.model.abstracts.BaseVertex;
  * @version $Revision: 673 $
  * @latest $Date: 2009-02-05 01:19:18 -0700 (Thu, 05 Feb 2009) $
  */
-public class Path implements BaseElementWithWeight
+public class Path implements BaseElementWithWeight, Comparable<Path>
 {
 	List<BaseVertex> _vertex_list = new Vector<BaseVertex>();
 	double _weight = -1;
@@ -97,5 +97,10 @@ public class Path implements BaseElementWithWeight
 	public String toString()
 	{
 		return _vertex_list.toString()+":"+_weight;
+	}
+
+	@Override
+	public int compareTo(Path arg0) {
+		return (int)this._weight - (int)arg0._weight;
 	}
 }
