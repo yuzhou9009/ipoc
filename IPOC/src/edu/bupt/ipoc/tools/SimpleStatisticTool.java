@@ -3,6 +3,7 @@ package edu.bupt.ipoc.tools;
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.BestEffortPacketService;
 import edu.bupt.ipoc.service.PacketService;
+import edu.bupt.ipoc.service.Service;
 import edu.bupt.ipoc.service.VirtualTransLink;
 
 import java.text.DecimalFormat;
@@ -102,8 +103,46 @@ public class SimpleStatisticTool implements Tool {
 		
 		for(VirtualTransLink vtl : vtls)
 			_bw_all += vtl.getCapacity();
-		//System.out.println("Total occupied bw is :"+_bw_all);
-		//System.out.println("Total vtl count is :"+vtls.size());
+		System.out.println("Total occupied bw is :"+_bw_all+"\t"+"Total vtl count is :"+vtls.size());
 		return _bw_all;		
+	}
+
+	public void showUtiliztionofPSs(int occupiedResource, List<PacketService> list) {
+		
+		DecimalFormat decimalFormat=new DecimalFormat("0.000");
+		double utilization;
+		int occupiedBW = 0;
+		
+		for(int i = 0; i < Service.TIME_BUCKET_NUM; i++)
+		{
+			occupiedBW = 0;
+			for(PacketService ps : list)
+			{
+				occupiedBW += ps.getActualBwItUsed(i);
+			}
+			utilization = occupiedBW * 1.0/occupiedResource;
+			System.out.print(decimalFormat.format(utilization) + "\t");
+		}
+		
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void showCurrentUtiliztionofPSs(int occupiedResource, List<PacketService> list, int _time) {
+		
+		DecimalFormat decimalFormat=new DecimalFormat("0.000");
+		double utilization;
+		int occupiedBW = 0;
+		
+		occupiedBW = 0;
+		for(PacketService ps : list)
+		{
+			occupiedBW += ps.getActualBwItUsed(_time);
+		}
+		utilization = occupiedBW * 1.0/occupiedResource;
+		System.out.print(decimalFormat.format(utilization) + "\t");
+		
+		// TODO Auto-generated method stub
+		
 	}
 }

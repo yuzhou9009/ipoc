@@ -73,21 +73,20 @@ public class PacketService extends Service implements Comparable<PacketService>{
 */	
 	public void cleanMyselfButKeepBWStatistics()
 	{
-		cleanMyselfWithoutBucketCount();
+		carriedVTL = null;
 //		current_bucket_count = 0;
 //		if(isPermanent == NOT_PERMANENT)
 //			fillBwArr(0);
-	}
-	
-	public void cleanMyselfWithoutBucketCount()
-	{
-		carriedVTL = null;
-		//TODO
 	}
 
 	@Override
 	public int compareTo(PacketService o) {
 		return o.priority - this.priority;
+	}
+
+	public int getActualBwItUsed(int _count) {
+		//Need to be overwrited
+		return -1;
 	}
 
 }

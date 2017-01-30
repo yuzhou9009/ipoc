@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +31,12 @@ public class IPOC {
 	
 	public IPOC()
 	{
-		topology = "Data/OpticalTopology/3Point";//nsfnetWeight";//networkdouble";
-		be_packet_num = 100;
+		topology = "Data/OpticalTopology/cost239Weight";//nsfnetWeight";//networkdouble";
+		be_packet_num = 2000;
 		bt_packet_num = 10000;
 		one_day_time_slice = 24*60*60/Service.TIME_STEP;
 		time_multiple = one_day_time_slice/Service.TIME_BUCKET_NUM;
-		test_days = 5;
+		test_days = 3;
 				
 		graph_G = new VariableGraph(topology);
 		sg = new ServiceGenerator(graph_G);
@@ -53,17 +54,28 @@ public class IPOC {
 		IPOC ipoc = new IPOC();
 		//ipoc.showAllPacketServicesState();
 		
-		//ipoc.oneTimeStaticlyCarryingPacketServices();
-		//ipoc.cc.sst.showOccupiedBwStatisticsOfAllVTLS(ipoc.cc.vtlm.getAllVTLs());
-		//ipoc.cc.sst.getPakcetServiceLatencyStatistics(ipoc.psl);
-		//ipoc.cc.sst.cleanAllConfigurations();
+		ipoc.oneTimeStaticlyCarryingPacketServices();
+		int occupiedResource = ipoc.cc.sst.showOccupiedBwStatisticsOfAllVTLS(ipoc.cc.vtlm.getAllVTLs());
+		ipoc.cc.sst.showUtiliztionofPSs(occupiedResource,ipoc.cc.psm.getAllPSs());
+		ipoc.cc.sst.getBestEffortPakcetServiceLatencyStatistics(ipoc.bepsl);
+		ipoc.cc.sst.cleanAllConfigurations();
+		
+		System.out.println("****************************Begin***************************************");
+		ipoc.oneTimeStaticlyCarryingButSharePacketServices();
+		occupiedResource = ipoc.cc.sst.showOccupiedBwStatisticsOfAllVTLS(ipoc.cc.vtlm.getAllVTLs());
+		ipoc.cc.sst.showUtiliztionofPSs(occupiedResource,ipoc.cc.psm.getAllPSs());
+		ipoc.cc.sst.getBestEffortPakcetServiceLatencyStatistics(ipoc.bepsl);
+		ipoc.cc.sst.cleanAllConfigurations();
+		System.out.println("\n*****************************End****************************************");	
 		
 		System.out.println("****************************Begin***************************************");
 		ipoc.oneTimeCarryingDivisiblePacketServicesWithVTLBOD();
-		ipoc.cc.sst.showOccupiedBwStatisticsOfAllVTLS(ipoc.cc.vtlm.getAllVTLs());
+		ipoc.cc.sst.showOccupiedBwStatisticsOfAllVTLS(ipoc.cc.vtlm.getAllVTLs());		
 		ipoc.cc.sst.getBestEffortPakcetServiceLatencyStatistics(ipoc.bepsl);
 		ipoc.cc.sst.cleanAllConfigurations();
 		System.out.println("\n*****************************End****************************************");
+		
+		
 		
 		System.out.println("****************************Begin***************************************");
 		ipoc.LongTimeCarryingIndivisiblePacketServicesWithVTLBOD();		
@@ -88,6 +100,27 @@ public class IPOC {
 			consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
 					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.STATIC_CARRIED, "The ps will be carried in a satatic way!"));
 			consmp.put(Constraint.VTL_CARRY_TYPE_C, 
+					new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.STATIC_AND_NOT_SHARED, "The vtl can not be extended and shared!"));
+			
+			if(cc.handleServiceRequest(ps, Service.PS_CARRIED_REQUEST, consmp))
+			{
+				tatal_successed_ps++;
+			}			
+		}
+		System.out.println("StaticlyCarrying: successed ps "+ tatal_successed_ps);
+		//cc.vtlm.showAllVirtualTransLink();
+	}
+	
+	private void oneTimeStaticlyCarryingButSharePacketServices() {
+		
+		int tatal_successed_ps = 0;
+		// traditional way. Carrying services according to the peek value* parameter(bigger than 1, for survivability) of services.
+		for(BestEffortPacketService ps : bepsl)
+		{
+			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
+			consmp.put(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, 
+					new Constraint(Constraint.PACKET_SERVICE_CARRIED_TYPE_C, PacketService.STATIC_CARRIED, "The ps will be carried in a satatic way!"));
+			consmp.put(Constraint.VTL_CARRY_TYPE_C, 
 					new Constraint(Constraint.VTL_CARRY_TYPE_C, VirtualTransLink.STATIC_BUT_SHARED, "The vtl can not be extended but shared!"));
 			
 			if(cc.handleServiceRequest(ps, Service.PS_CARRIED_REQUEST, consmp))
@@ -99,9 +132,12 @@ public class IPOC {
 		//cc.vtlm.showAllVirtualTransLink();
 	}
 	
+	
 	private void oneTimeCarryingDivisiblePacketServicesWithVTLBOD()
 	{
 		int tatal_successed_ps = 0;
+		
+		Collections.sort(bepsl);
 		
 		for(BestEffortPacketService ps : bepsl)
 		{
@@ -136,7 +172,7 @@ public class IPOC {
 				//for all running BT service, check their state
 				//If any service is out of date, remove it. do the adjustment.
 				//cc.em.checkEventList();
-				if(t_day > 0)
+				if(t_day > 2)
 				{
 					cc.psm.updateBTServicesStatue();
 					
@@ -178,8 +214,9 @@ public class IPOC {
 					}
 					
 					cc.checkVTLStatue();
-					//System.out.print(be_time+":");
-					cc.sst.showOccupiedBwStatisticsOfAllVTLS(cc.vtlm.getAllVTLs());
+					System.out.print(be_time+":");
+					int occupiedResource = cc.sst.showOccupiedBwStatisticsOfAllVTLS(cc.vtlm.getAllVTLs());
+					cc.sst.showCurrentUtiliztionofPSs(occupiedResource,cc.psm.getAllPSs(),be_time);
 					//if(t_day == test_days-1 && (be_time == 20 || be_time == 200))
 					//{
 					//	cc.vtlm.showAllVirtualTransLink();

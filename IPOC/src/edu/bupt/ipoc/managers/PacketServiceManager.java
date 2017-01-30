@@ -156,4 +156,24 @@ public class PacketServiceManager{
 			}
 		}
 	}
+	
+/*	public int getAllBwPacketServiceOccupied()
+	{
+		int tem = 0;
+		for(List<PacketService> _psl : this.vertex_pair_ps_map.values())
+		{
+			for(PacketService ps: _psl)
+				tem += ps.getActualBwItUsed();
+		}
+		return tem;
+	}
+*/
+	public List<PacketService> getAllPSs() {
+		List<PacketService> all_ps = new ArrayList<PacketService>();
+		for(List<PacketService> _psl : this.vertex_pair_ps_map.values())
+		{
+			all_ps.addAll(_psl);
+		}
+		return all_ps;
+	}
 }

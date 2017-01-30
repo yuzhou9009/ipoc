@@ -47,6 +47,7 @@ public class CentralizedController implements BasicController {
 	public OTNRequestHandler otnrh = null;
 	
 	public SimpleStatisticTool sst = null;
+	
 		
 	public CentralizedController(VariableGraph _graph_G)
 	{

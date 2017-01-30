@@ -57,7 +57,7 @@ public class VTLRequestHandler{
 						bc.mappingServices(vtl, _tem, null);
 						return true;
 					}
-					else
+					/*else
 					{
 						_tem = bc.establishNewOneToFitRequest(vtl, Service.UseOTNService, cons);
 						if(_tem != null)
@@ -65,7 +65,7 @@ public class VTLRequestHandler{
 							bc.mappingServices(vtl, _tem, null);
 							return true;
 						}
-					}
+					}*/
 				}
 				else
 				{

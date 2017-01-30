@@ -120,8 +120,9 @@ public class ServiceGenerator {
 				_dest_node= tem;
 			}
 			
-			_priority = PacketService.RANDOM_PRIORITY;
 			
+			_priority = java.util.concurrent.ThreadLocalRandom.current().nextInt(1,3);
+			//System.out.println(_priority);
 			ps_tem = new BestEffortPacketService(generate_an_id(),_souce_node,_dest_node,_priority,BestEffortPacketService.RANDOM_BW);
 			
 			beps_list.add(ps_tem);

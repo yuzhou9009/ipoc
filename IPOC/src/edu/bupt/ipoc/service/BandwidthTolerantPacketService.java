@@ -42,6 +42,10 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 			return current_rate;
 	}
 	
+	public int getActualBwItUsed(int _count) {
+		return getCurrentOccupiedBw();
+	}
+	
 	public int updateCurrent_rate()
 	{
 		current_rate = 0;
@@ -56,9 +60,10 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 	
 	public void cleanMyselfButKeepBWStatistics()
 	{
-		cleanMyselfWithoutBucketCount();
+		super.cleanMyselfButKeepBWStatistics();
 		this.rest_data_to_be_transfered = this.total_data_size;
 		this.rest_time_long = this.limited_time;
+		current_rate = 0;
 		if(sub_btpss != null)
 			sub_btpss.clear();
 		sub_btpss = null;

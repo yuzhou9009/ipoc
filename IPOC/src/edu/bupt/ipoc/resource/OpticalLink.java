@@ -4,7 +4,7 @@ package edu.bupt.ipoc.resource;
 
 public class OpticalLink {
 	
-	public static final int SLOTS = 20;
+	public static final int SLOTS = 80;
 	
 	public static final int FREE_FLAG = 0;
 	public static final int INIT_COLOR = 1;
