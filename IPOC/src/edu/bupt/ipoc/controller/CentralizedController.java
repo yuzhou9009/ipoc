@@ -80,7 +80,25 @@ public class CentralizedController implements BasicController {
 				return true;
 			}
 			else
+			{
+				/*
+				List<VirtualTransLink> teml = vtlm.getVTLs(((PacketService) ss).sourceNode,((PacketService) ss).destNode);
+				
+				int _bw_all = 0;
+				
+				for(VirtualTransLink vtl : teml)
+					_bw_all += vtl.getCapacity();
+				
+				List<PacketService> psl = psm.getPSs(((PacketService) ss).sourceNode,((PacketService) ss).destNode);
+				
+				int _bw_used = 0;
+				for(PacketService ps : psl)
+					_bw_used += ps.getCurrentOccupiedBw();
+				
+				System.out.println("Utilization:"+ _bw_used*1.0/_bw_all);
+				*/
 				sst.addFaultPacketService(_ps);
+			}
 		}		
 		else if(ss instanceof OpticalService)
 		{
@@ -99,6 +117,8 @@ public class CentralizedController implements BasicController {
 			{
 				if(command == VirtualTransLink.BUILD_REQUEST)
 					vtlm.addService(_vtl);
+				else if(command == VirtualTransLink.REMOVE_REQUEST)
+					vtlm.deleteService(_vtl);
 				return true;
 			}
 		}
@@ -264,24 +284,48 @@ public class CentralizedController implements BasicController {
 				}
 				else if(OTNService.BW_1G <_init_bw_c && _init_bw_c <= (OpticalService.SUB_OTN_NUM * OTNService.BW_1G))
 				{
-					//TODO need to be extended, we should use all otns which have the same path, not limited the same os.
-					List<OpticalService> _osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
-					//OpticalService _os = osm.findFitOs(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c);
-					
-					if(_osl !=null)
+					List<OpticalService> _osl = null;
+					if(_vtl.vtl_priority ==  VirtualTransLink.PRIORITY_HIGH)
 					{
-						return setUpOTNServices(_osl,_init_bw_c);
-					}					
+						_osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c, Service.STRICT_ROUTING);
+						if(_osl !=null)
+						{
+							return setUpOTNServices(_osl,_init_bw_c);
+						}
+						else
+						{
+							OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
+									_vtl.sourceVertex, _vtl.destVertex, 1, 0);
+							if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
+							{
+								_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
+								this.saveService(_os);
+								return setUpOTNServices(_os,_init_bw_c);
+							}
+						}
+					}
+					else if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_MID)
+					{
+						_osl = osm.findFitOss(_vtl.sourceVertex,_vtl.destVertex,OpticalService.CHANNEL_10G_FOT_OTN,_init_bw_c, Service.NOT_STRICT_ROUTING);
+						if(_osl !=null)
+						{
+							return setUpOTNServices(_osl,_init_bw_c);
+						}
+						else
+						{
+							OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
+									_vtl.sourceVertex, _vtl.destVertex, 1, 0);
+							if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
+							{
+								_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
+								this.saveService(_os);
+								return setUpOTNServices(_os,_init_bw_c);
+							}
+						}
+					}
 					else
 					{
-						OpticalService _os = new OpticalService(ServiceGenerator.generate_an_id(),
-								_vtl.sourceVertex, _vtl.destVertex, 1, 0);
-						if(orrh.handlerRequest(_os, OpticalService.BUILD_REQUEST, null))
-						{
-							_os.setType(OpticalService.CHANNEL_10G_FOT_OTN);
-							this.saveService(_os);
-							return setUpOTNServices(_os,_init_bw_c);
-						}
+						System.out.println("Should never be here");
 					}
 				}
 				else
@@ -293,7 +337,7 @@ public class CentralizedController implements BasicController {
 			{
 				List<OpticalService> _osl = null;
 				
-				if(_vtl.vtl_priority != VirtualTransLink.PRIORITY_LOW)
+				if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_HIGH)
 				{
 					for(OTNService onts : _vtl.relevantOTNServices)
 					{
@@ -369,11 +413,25 @@ public class CentralizedController implements BasicController {
 		
 		if(ss1 instanceof PacketService && ss2 instanceof VirtualTransLink)
 		{
-			PacketService ps = (PacketService)ss1;
-			VirtualTransLink vtl = (VirtualTransLink)ss2;
-			
-			ps.carriedVTL = vtl;
-			vtl.addPacketServiceToCarry(ps);		
+			if(ss1 instanceof BandwidthTolerantPacketService)
+			{
+				BandwidthTolerantPacketService btps = (BandwidthTolerantPacketService) ss1;
+				VirtualTransLink vtl = (VirtualTransLink)ss2;
+				btps.sub_btpss = new ArrayList<SubBTService>();
+				SubBTService sub_btps = new SubBTService(ServiceGenerator.generate_an_id(), btps.sourceNode,
+						btps.destNode,btps.priority, vtl, vtl.getAcutallyRestBWforShare(), btps);
+				btps.sub_btpss.add(sub_btps);
+				vtl.addPacketServiceToCarry(sub_btps);
+				btps.updateCurrent_rate();
+			}
+			else
+			{
+				PacketService ps = (PacketService)ss1;
+				VirtualTransLink vtl = (VirtualTransLink)ss2;
+				
+				ps.carriedVTL = vtl;
+				vtl.addPacketServiceToCarry(ps);
+			}			
 		}
 		else if(ss1 instanceof VirtualTransLink && ss2 instanceof OpticalService)
 		{
@@ -453,7 +511,10 @@ public class CentralizedController implements BasicController {
 		{
 			if(_tems instanceof VirtualTransLink)
 			{
-				((VirtualTransLink) _tems).removeCarriedPacketService((PacketService)ss);
+				VirtualTransLink vtl = (VirtualTransLink)_tems;
+				vtl.removeCarriedPacketService((PacketService)ss);
+				if(vtl.getCurrentPacketServiceNumber() == 0)//vtl.type != VirtualTransLink.VTL_BOD && vtl.getCurrentPacketServiceNumber() == 0)
+					this.handleServiceRequest(vtl, VirtualTransLink.REMOVE_REQUEST, null);					
 				return true;
 			}
 		}
@@ -645,7 +706,7 @@ public class CentralizedController implements BasicController {
 						}
 						else if(tem<0)
 						{
-							System.out.println("0There must be some big mistake!! the canOfferBW is:"+tem);
+							//TODO System.out.println("0There must be some big mistake!! the canOfferBW is:"+tem);
 							tem = vtl.getAcutallyRestBWforShare();
 						}
 					}
@@ -849,9 +910,29 @@ public class CentralizedController implements BasicController {
 					sub_s.expendItself(canUseMoreBW);
 					break;
 				}
-				
-		
 			}
+			if(_vtl.vtl_priority == VirtualTransLink.PRIORITY_LOW && canUseMoreBW > 0)
+			{
+				boolean need_shrinked = false;
+				if(_vtl.relevantOTNServices != null && _vtl.relevantOTNServices.size() > 0)
+				{
+					if((_vtl.bw_capacity- (int)(_vtl.getUsedBWofVTLByAllPacketServices()/_vtl.th_usp_low))/Service.BW_1G > 0)
+					{
+						need_shrinked = true;
+					}
+				}
+				if(_vtl.relevantOpticalServices.size() > 1)
+				{
+					if((_vtl.bw_capacity- (int)(_vtl.getUsedBWofVTLByAllPacketServices()/_vtl.th_usp_low))/Service.BW_10G > 0)
+					{
+						need_shrinked = true;
+					}
+				}
+				if(need_shrinked == true)
+				{
+					handleServiceRequest(_vtl, VirtualTransLink.SHRINKED_REQUEST, null);
+				}
+			}			
 		}
 		else
 		{

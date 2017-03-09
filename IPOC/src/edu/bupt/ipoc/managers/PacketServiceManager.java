@@ -176,4 +176,20 @@ public class PacketServiceManager{
 		}
 		return all_ps;
 	}
+	
+	public List<PacketService> getAllPSsWithoutLowPriority() {
+		List<PacketService> all_ps = new ArrayList<PacketService>();
+		for(List<PacketService> _psl : this.vertex_pair_ps_map.values())
+		{
+			for(PacketService _ps : _psl)
+				if(_ps.priority != Service.PRIORITY_LOW)
+					all_ps.add(_ps);
+		}
+		return all_ps;
+	}
+
+	public List<PacketService> getPSs(int _source, int _dest) {
+		
+		return this.vertex_pair_ps_map.get(new Pair<Integer,Integer>(_source, _dest));
+	}
 }

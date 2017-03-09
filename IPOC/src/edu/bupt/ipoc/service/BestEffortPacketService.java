@@ -49,6 +49,10 @@ public class BestEffortPacketService extends PacketService{
 	public int getActualBwItUsed(int _count) {
 		return real_time_bw_buckets[_count] ;
 	}
+	
+	public int getActualBwItUsed() {
+		return real_time_bw_buckets[current_bucket_count] ;
+	}
 
 	public int getPeekBw()
 	{

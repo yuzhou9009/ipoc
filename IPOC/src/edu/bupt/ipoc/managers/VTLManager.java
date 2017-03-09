@@ -49,10 +49,15 @@ public class VTLManager{
 					for(VirtualTransLink vtl : vtll)
 					{
 						if(vtl_carry_type_c.value == VirtualTransLink.STATIC_AND_NOT_SHARED)
-							continue;
+						{
+							if(vtl.getCurrentPacketServiceNumber() > 0 || vtl.vtl_priority!= cons.get(Constraint.PRIORITY_C).value)
+								continue;
+							if(vtl.canOfferMoreBW(init_bw_c.value))
+								return vtl;
+						}
 						else if(vtl_carry_type_c.value == VirtualTransLink.STATIC_BUT_SHARED)
 						{
-							if(vtl.vtl_priority != Service.PRIORITY_LOW && vtl.vtl_priority!= cons.get(Constraint.PRIORITY_C).value)
+							if(vtl.vtl_priority!= cons.get(Constraint.PRIORITY_C).value)
 								continue;
 							if(vtl.canOfferMoreBW(init_bw_c.value))
 								return vtl;
@@ -167,7 +172,7 @@ public class VTLManager{
 							;
 						else
 						{
-							System.out.println("1There must be some big mistake!! the canOfferBW is:"+canOfferBW);
+							;//TODO System.out.println("1There must be some big mistake!! the canOfferBW is:"+canOfferBW);
 						}
 					}
 				}
@@ -194,7 +199,7 @@ public class VTLManager{
 							else if(canOfferBW == 0)
 								;
 							else
-								System.out.println("2There must be some big mistake!! the canOfferBW is:"+canOfferBW);
+								;//TODO System.out.println("2There must be some big mistake!! the canOfferBW is:"+canOfferBW);
 						}
 					}
 				}
@@ -209,6 +214,20 @@ public class VTLManager{
 		
 		for(List<VirtualTransLink> _vtls : vertex_pair_vtl_map.values())
 			vtls.addAll(_vtls);
+		
+		return vtls;
+	}
+	
+	public List<VirtualTransLink> getAllVTLsWithoutLowPriority()
+	{
+		List<VirtualTransLink> vtls = new ArrayList<VirtualTransLink>();
+		
+		for(List<VirtualTransLink> _vtls : vertex_pair_vtl_map.values())
+		{
+			for(VirtualTransLink _vtl : _vtls)
+				if(_vtl.vtl_priority != Service.PRIORITY_LOW)
+					vtls.add(_vtl);
+		}
 		
 		return vtls;
 	}
@@ -351,8 +370,11 @@ public class VTLManager{
 			}
 		}
 
+		int count = 0;
 		for(VirtualTransLink vtl : shrinked_vtl_list)
 		{
+			if(vtl.vtl_priority != VirtualTransLink.PRIORITY_LOW)
+				count++;
 			if(bc.handleServiceRequest(vtl, VirtualTransLink.SHRINKED_REQUEST, null))
 			{
 				currentStatue = vtl.getCurrentStatue();
@@ -362,9 +384,13 @@ public class VTLManager{
 			else
 				System.out.println("Shinked failed, which is impossible!!");
 		}
+		//System.out.print("Shrinked time \t"+count);
 		
+		count = 0;
 		for(VirtualTransLink vtl : extended_vtl_list)
 		{
+			if(vtl.vtl_priority != VirtualTransLink.PRIORITY_LOW)
+				count++;
 			Map<Integer,Constraint> consmp = new HashMap<Integer,Constraint>();
 			int _tem_extend_bw = -1;
 			
@@ -385,6 +411,7 @@ public class VTLManager{
 				bc.handleServiceRequest(vtl, VirtualTransLink.EXTEND_REQUEST, consmp);
 			}
 		}
+		//System.out.println("\textended time \t"+count);
 		
 		for(VirtualTransLink vtl : adjusted_vtl_list)
 		{
@@ -424,5 +451,25 @@ public class VTLManager{
 	public List<VirtualTransLink> getVTLs(int sourceVertex, int destVertex) {
 		List<VirtualTransLink> vtll = vertex_pair_vtl_map.get(new Pair<Integer, Integer>(sourceVertex,destVertex));
 		return vtll;
+	}
+
+	public void showUtilizationofEveryPairOfNodes() {
+		//int i =0;
+		for(List<VirtualTransLink> tem_l : vertex_pair_vtl_map.values())
+		{
+			int sum_capacity = 0;
+			int sum_bw_used = 0;
+			int vtl_count = 0;
+			for(VirtualTransLink vtl : tem_l)
+			{
+				if(vtl.vtl_priority == Service.PRIORITY_LOW)
+					continue;
+				sum_capacity += vtl.getCapacity();
+				sum_bw_used += vtl.getAcutalUsedBWofVTLByAllPacketServices();
+				vtl_count ++;
+			}
+			//i++;
+			System.out.println("From "+tem_l.get(0).sourceVertex+" to "+tem_l.get(0).destVertex+" uti:\t"+sum_bw_used * 1.0/sum_capacity+"\t vtl_count:\t"+vtl_count);				
+		}
 	}
 }

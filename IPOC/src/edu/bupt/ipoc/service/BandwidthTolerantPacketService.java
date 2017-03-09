@@ -46,6 +46,10 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 		return getCurrentOccupiedBw();
 	}
 	
+	public int getActualBwItUsed() {
+		return getCurrentOccupiedBw();
+	}
+	
 	public int updateCurrent_rate()
 	{
 		current_rate = 0;
@@ -54,7 +58,7 @@ public class BandwidthTolerantPacketService extends PacketService implements Com
 			current_rate += subbts.static_bw;
 		}
 		if(current_rate > (int)(Service.MAX_ALLOWED_BW * TH_USP_LOW))
-			System.out.println("Out of range there must be something wrong :"+current_rate);
+			;//TODO System.out.println("Out of range there must be something wrong :"+current_rate);
 		return current_rate;
 	}
 	

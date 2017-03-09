@@ -1,6 +1,7 @@
 package edu.bupt.ipoc.tools;
 
 import edu.bupt.ipoc.controller.BasicController;
+import edu.bupt.ipoc.service.BandwidthTolerantPacketService;
 import edu.bupt.ipoc.service.BestEffortPacketService;
 import edu.bupt.ipoc.service.PacketService;
 import edu.bupt.ipoc.service.Service;
@@ -32,7 +33,7 @@ public class SimpleStatisticTool implements Tool {
 		faultPacketServices.add(_ps);
 		if(msg_print == INFO || msg_print == DEBUG)
 		{
-			System.out.println("This ps request cannot be carried successfully, id:"+_ps.id+"\t priority:"+_ps.priority);
+			;//System.out.println("This ps request cannot be carried successfully, id:"+_ps.id+"\t priority:"+_ps.priority);
 		}
 			
 	}
@@ -42,6 +43,13 @@ public class SimpleStatisticTool implements Tool {
 		faultPacketServices.clear();
 		bc.clearAll();
 	}
+	
+	public void cleanBTPSList(List<BandwidthTolerantPacketService> btpss)
+	{
+		for(BandwidthTolerantPacketService btps : btpss)
+			btps.cleanMyselfButKeepBWStatistics();
+	}
+	
 	/*
 	public void getPakcetServiceLatencyStatistics(List<PacketService> psl)
 	{
@@ -103,7 +111,7 @@ public class SimpleStatisticTool implements Tool {
 		
 		for(VirtualTransLink vtl : vtls)
 			_bw_all += vtl.getCapacity();
-		System.out.println("Total occupied bw is :"+_bw_all+"\t"+"Total vtl count is :"+vtls.size());
+		//System.out.print("Total occupied bw is :"+_bw_all+"\t"+"Total vtl count is :"+vtls.size());
 		return _bw_all;		
 	}
 
@@ -112,7 +120,6 @@ public class SimpleStatisticTool implements Tool {
 		DecimalFormat decimalFormat=new DecimalFormat("0.000");
 		double utilization;
 		int occupiedBW = 0;
-		
 		for(int i = 0; i < Service.TIME_BUCKET_NUM; i++)
 		{
 			occupiedBW = 0;
@@ -121,11 +128,41 @@ public class SimpleStatisticTool implements Tool {
 				occupiedBW += ps.getActualBwItUsed(i);
 			}
 			utilization = occupiedBW * 1.0/occupiedResource;
-			System.out.print(decimalFormat.format(utilization) + "\t");
+			System.out.println(decimalFormat.format(utilization) + "\t");
 		}
 		
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public void showCurrentUtilizationofAllVtls(List<VirtualTransLink> vtls, int _time)
+	{
+		DecimalFormat decimalFormat=new DecimalFormat("0.000");
+		double utilization;		
+		int _bw_all = 0;
+		int _bw_used = 0;
+		int _bw_vtl_low = 0;
+		int _bw_used_vtl_low = 0;
+		int _bw_vtl_be = 0;
+		int _bw_used_vtl_be = 0;
+		
+		for(VirtualTransLink vtl : vtls)
+		{
+			_bw_all += vtl.getCapacity();
+			_bw_used += vtl.getAcutalUsedBWofVTLByAllPacketServices();
+			if(vtl.vtl_priority == Service.PRIORITY_LOW)
+			{
+				_bw_vtl_low += vtl.getCapacity();
+				_bw_used_vtl_low += vtl.getAcutalUsedBWofVTLByAllPacketServices();
+			}
+			else
+			{
+				_bw_vtl_be += vtl.getCapacity();
+				_bw_used_vtl_be += vtl.getAcutalUsedBWofVTLByAllPacketServices();
+			}
+		}
+		utilization = _bw_used * 1.0/_bw_all;
+		System.out.println(_time+"BW_ALL:\t"+_bw_all+"\tu:\t"+decimalFormat.format(utilization) + "\t"+decimalFormat.format(_bw_used_vtl_low * 1.0/_bw_vtl_low) + "\t"+decimalFormat.format(_bw_used_vtl_be * 1.0/_bw_vtl_be) + "\t");
 	}
 	
 	public void showCurrentUtiliztionofPSs(int occupiedResource, List<PacketService> list, int _time) {
@@ -140,9 +177,12 @@ public class SimpleStatisticTool implements Tool {
 			occupiedBW += ps.getActualBwItUsed(_time);
 		}
 		utilization = occupiedBW * 1.0/occupiedResource;
-		System.out.print(decimalFormat.format(utilization) + "\t");
+		System.out.print(_time+"\tu:"+decimalFormat.format(utilization) + "\t");
 		
-		// TODO Auto-generated method stub
+	}
+
+	public void calulateBlockingProbability(int sum_num) {
+		System.out.println("BlockingProbability"+this.faultPacketServices.size()*1.0/sum_num);
 		
 	}
 }

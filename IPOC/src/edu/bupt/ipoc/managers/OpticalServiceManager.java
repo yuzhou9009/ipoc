@@ -9,6 +9,7 @@ import edu.asu.emit.qyan.alg.model.Pair;
 import edu.asu.emit.qyan.alg.model.Path;
 import edu.bupt.ipoc.controller.BasicController;
 import edu.bupt.ipoc.service.OpticalService;
+import edu.bupt.ipoc.service.Service;
 
 public class OpticalServiceManager{
 	
@@ -71,43 +72,77 @@ public class OpticalServiceManager{
 		return null;
 	}
 	
-	public List<OpticalService> findFitOss(int _source, int _dest, int _type, int capacityRequest)
+	public List<OpticalService> findFitOss(int _source, int _dest, int _type, int capacityRequest, boolean f_strict_routing)
 	{
-		List<OpticalService> _osl = null;
-		OpticalService _os = findFitOs(_source,_dest,_type,capacityRequest);
+		if(_type != OpticalService.CHANNEL_10G_FOT_OTN)
+		{
+			System.out.println("Please check the input of findFitOss");
+			return null;
+		}
+		int request_otn_number = (capacityRequest-1)/Service.BW_1G + 1;
 		
-		if(_os != null)
+		List<List<OpticalService>> _osl = new ArrayList<List<OpticalService>>();
+		
+		List<OpticalService> _tem = vertex_pair_os_map.get(new Pair<Integer,Integer>(_source, _dest));
+		
+		if(_tem !=null && f_strict_routing)
 		{
-			_osl =  new ArrayList<OpticalService>();
-			_osl.add(_os);
-		}
-		else
-		{
-			if(_type == OpticalService.CHANNEL_10G_FOT_OTN)
+			for(OpticalService _os : _tem)
 			{
-				/*
-				List<OpticalService> osl_tem = vertex_pair_os_map.get(new Pair<Integer,Integer>(_source,_dest));
-				if(osl_tem == null || osl_tem.size() == 0)
-					return null;
-				System.out.println(osl_tem.size()+"");
-				for(OpticalService _ooo : osl_tem)
+				if(_os.type == OpticalService.CHANNEL_10G_FOT_OTN && _os.getNumberofFreeOTNs() > 0)
 				{
-					System.out.println(_ooo.path+"");
-					System.out.println(osl_tem.get(0).path+"");
-					
-					if(_ooo.path.equals(osl_tem.get(0).path))
-						System.out.println("True");
+					if(_osl.size() > 0)
+					{
+						for(List<OpticalService> sub_list : _osl)
+						{
+							if(sub_list.get(0).path.equals(_os.path))
+							{
+								sub_list.add(_os);
+								if(getAvailableOTNsNumber(sub_list) >= request_otn_number)
+									return sub_list;
+								break;
+							}
+						}
+						List<OpticalService> new_list = new ArrayList<OpticalService>();
+						new_list.add(_os);
+						_osl.add(new_list);	
+						if(getAvailableOTNsNumber(new_list) >= request_otn_number)
+							return new_list;
+						//
+					}
+					else
+					{
+						List<OpticalService> new_list = new ArrayList<OpticalService>();
+						new_list.add(_os);
+						_osl.add(new_list);
+						if(getAvailableOTNsNumber(new_list) >= request_otn_number)
+							return new_list;
+						//
+					}
 				}
-				*/
-				//TODO get a list of oss, they offer the otns together. A little complete
-				//According to the test this is not that necessary.
-			}
-			else if(_type == OpticalService.CHANNEL_100G_SINGLE)
-			{
-				
-			}
+			}	
+			return null;
 		}
-		return _osl;
+		else if(_tem !=null )
+		{
+			_tem = findFitOss(_source,_dest,_type,null);
+			
+			if(_tem != null && _tem.size() > 0 && getAvailableOTNsNumber(_tem) >= request_otn_number)
+				return _tem;
+			return null;
+		}
+		return null;
+	}
+	
+	public int getAvailableOTNsNumber(List<OpticalService> _osl)
+	{
+		int tem = 0;
+		for(OpticalService _os : _osl)
+		{
+			tem += _os.getNumberofFreeOTNs();
+		}
+		
+		return tem;
 	}
 	
 	public List<OpticalService> findFitOss(int _source, int _dest, int _type, Path _path)
@@ -126,7 +161,7 @@ public class OpticalServiceManager{
 
 		for(OpticalService _ooo : osl_tem)
 		{			
-			if(_ooo.type == OpticalService.CHANNEL_10G_FOT_OTN)
+			if(_ooo.type == OpticalService.CHANNEL_10G_FOT_OTN && _ooo.otn_children.size() < OpticalService.SUB_OTN_NUM )
 			{
 				if((_path != null && _ooo.path.equals(_path)) || _path == null)
 					osl_return.add(_ooo);					

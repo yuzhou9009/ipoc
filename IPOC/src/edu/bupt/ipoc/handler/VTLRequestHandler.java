@@ -117,6 +117,12 @@ public class VTLRequestHandler{
 			return bc.adjustSpecificVTL(vtl, tem_bw);	
 			
 		}
+		else if(command == VirtualTransLink.REMOVE_REQUEST)
+		{
+			List<Service> _tems = vtl.getAllResource();
+			bc.unmappingServices(vtl, _tems, null);
+			return true;
+		}
 
 		return false;
 	}

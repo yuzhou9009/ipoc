@@ -89,4 +89,8 @@ public class PacketService extends Service implements Comparable<PacketService>{
 		return -1;
 	}
 
+	public int getActualBwItUsed() {
+		//Need to be overwrited
+		return -1;
+	}
 }

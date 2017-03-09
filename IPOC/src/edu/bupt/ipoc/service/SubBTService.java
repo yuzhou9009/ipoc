@@ -26,6 +26,16 @@ public class SubBTService extends PacketService implements Comparable<PacketServ
 	{
 		return this.static_bw;
 	}
+	
+	public int getActualBwItUsed(int _count) {
+		//Need to be overwrited
+		return this.static_bw;
+	}
+	
+	public int getActualBwItUsed() {
+		//Need to be overwrited
+		return this.static_bw;
+	}
 
 	public boolean shrinkItself(int request_bw) {
 		if(request_bw > static_bw)

@@ -9,14 +9,14 @@ public class Service {
 	
 	//bucket_num for one day
 	public static final int TIME_BUCKET_NUM = 240;
-	public static final int TIME_STEP = 1;//60 secends
+	public static final int TIME_STEP = 2; //seconds
 	
 	public static final int BW_1G = 1000;
 	public static final int BW_10G = 10000;
 	public static final int BW_40G = 40000;
 	public static final int BW_100G = 100000;
 	
-	public static final int MAX_ALLOWED_BW = BW_10G - 1;
+	public static final int MAX_ALLOWED_BW = BW_10G;
 	
 	public static final int STATIC_MIN_RATE = 50;
 	public static final int MIN_SHARED_BW_GRANULARITY = STATIC_MIN_RATE;
@@ -43,6 +43,9 @@ public class Service {
 	public static final int UseOTNService = 16;
 	
 	public static final int OTN_BUILD_REQUEST = 21;
+	
+	public static final boolean STRICT_ROUTING = true;
+	public static final boolean NOT_STRICT_ROUTING = false;
 	
 
 	public static final double TH_USP_LOW = 0.95;
