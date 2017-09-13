@@ -1,4 +1,5 @@
 package gui;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,168 +8,108 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.border.MatteBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-public class StockAccountInfoQueryResult extends CustomedPage{
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-	JTextArea header = new JTextArea();
-	JLabel footer = new JLabel();
-
-	JPanel subPanel = new JPanel();
-
-	JPanel subsubsubPanel = new JPanel();
-	JPanel subsubPanel_h = new JPanel();
-	JPanel subsubPanel_m = new JPanel();
-	JPanel subsubPanel_l = new JPanel();
+public class StockAccountInfoQueryResult extends JPanel {
 	
-	JLabel left_l = new JLabel();
-	JLabel right_l = new JLabel();
 	
-	JTextPane result_tp = new JTextPane();
+	//JTextPane result_tp = new JTextPane();
 	JTable result_tb;// = new JTable();
 	JScrollPane jsp;
 	
-
-	JLabel xinxihang_l = new JLabel();
-	JLabel subsubheader_l = new JLabel();
-	int tradeNum = 115810;
+	List<StockAccount> saifqrl = new ArrayList<StockAccount>();
+	
+	
+	String[] columnNames = { "¹É½ğÕÊºÅ               ",
+			"·ÖÕËºÅ", "²úÆ·ÖÖÀà",
+			"²úÆ·Ãû³Æ","ÕË»§Ãû³Æ                                                  ",
+			"´æÔÚ×´Ì¬","ÕË»§Óà¶î","¶³½á/Ö¹¸¶×´Ì¬",
+			"¶³½á/Ö¹¸¶½ğ¶î","Ö§È¡·½Ê½","¹ÒÊ½×´Ì¬","¿ª»§ÈÕÆÚ",
+			"Æ¾Ö¤ºÅÂë      ",
+			"·ÖºìÕË»§      ",
+			"Ïú»§ÈÕÆÚ","Ö¤¼şÀàĞÍ","Ö¤¼şºÅÂë","¿ª»§Íøµã","´òÓ¡Ãû³Æ"};
+	
 	
 	public StockAccountInfoQueryResult()
 	{
-		self = this;
-		
-		MatteBorder mb_h = new MatteBorder(0,0,3,0,Color.LIGHT_GRAY);
-		header.setPreferredSize(new Dimension(0,64));
-		header.setBackground(Color.BLACK);
-		header.setBorder(mb_h);
-		header.setForeground(Color.LIGHT_GRAY);
-		header.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		header.setText("  ç½‘ç‚¹ ï¼š362102                                        äº¤æ˜“ç  ï¼š"+tradeNum+"\n  æ—¥æœŸ ï¼š"
-				+getCurrentDate()+"             è‚¡é‡‘è´¦æˆ·ä¿¡æ¯æŸ¥è¯¢       å±å¹•å· ï¼š["+tradeNum+"-1]");
-		header.setEditable(false);
-		header.setFocusable(false);
-		
-		MatteBorder mb_f = new MatteBorder(3,0,0,0,Color.LIGHT_GRAY);
-		footer.setPreferredSize(new Dimension(0,60));
-		footer.setBackground(Color.BLACK);
-		footer.setBorder(mb_f);
-		footer.setForeground(Color.LIGHT_GRAY);
-		footer.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		footer.setText("  æŸœå‘˜ï¼š364571  æè‹¥æ…§     pts/66   F3=é€€å‡º  F9=é‡å¤  F10=æäº¤  F1=å¸®åŠ©");
-		footer.setFocusable(false);
-		
-		MatteBorder mb_r = new MatteBorder(2,2,2,2,Color.LIGHT_GRAY);
+/*		MatteBorder mb_r = new MatteBorder(2,2,2,2,Color.LIGHT_GRAY);
 		result_tp.setPreferredSize(new Dimension(0,60));
 		result_tp.setBackground(Color.BLACK);
 		result_tp.setBorder(mb_r);
 		result_tp.setForeground(Color.LIGHT_GRAY);
 		
-		result_tp.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
+		result_tp.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
 		result_tp.setText("AAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCAAAAAAAAA\n\n\n\n");
-		JScrollPane sp = new JScrollPane(result_tp);
-		sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		result_tp.setCaretColor(Color.WHITE);
+		//JScrollPane sp = new JScrollPane(result_tp);
+		result_tp.setCaretColor(Color.WHITE);*/
 		
-		subsubheader_l.setBackground(Color.BLACK);
-		subsubheader_l.setForeground(Color.LIGHT_GRAY);
-		subsubheader_l.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		subsubheader_l.setText("<html><body>æŸ¥  è¯¢  æœº  æ„ ï¼š<br>è´¦  &nbsp&nbsp&nbspæˆ· ï¼š<br>äº§  å“  ç»„  åˆ« ï¼š</body></html>");//\n\næŸ¥è¯¢ç»“æ„ï¼š\nè´¦æˆ·\näº§å“ç»„åˆ«");
-		subsubheader_l.setPreferredSize(new Dimension(200,150));
+		//jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		//jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		//this.setBackground(Color.BLACK);
+
 		
-		xinxihang_l.setBackground(Color.BLACK);
-		xinxihang_l.setForeground(Color.LIGHT_GRAY);
-		xinxihang_l.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		xinxihang_l.setText("  ä¿¡æ¯è¡Œï¼š");
-		xinxihang_l.setPreferredSize(new Dimension(0,36));
-		
-		//result_tb.set
 		accountInfoTableInit();
 		
-		subsubPanel_h.setBackground(Color.BLACK);
-		subsubPanel_h.setLayout(new BorderLayout());
-		subsubPanel_h.add(subsubheader_l, BorderLayout.WEST);
-
-		subsubPanel_l.setBackground(Color.BLACK);
-		subsubPanel_l.setLayout(new BorderLayout());
-		subsubPanel_l.add(xinxihang_l, BorderLayout.CENTER);
+		jsp = new JScrollPane(result_tb);
+		jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		jsp.setBackground(Color.BLACK);
+		this.setLayout(new BorderLayout());
+		this.add(jsp, BorderLayout.CENTER);
 		
-		subsubPanel_m.setLayout(new BorderLayout());
-		subsubPanel_m.add(jsp,BorderLayout.CENTER);
-		
-		subsubsubPanel.setLayout(new BorderLayout());
-		subsubsubPanel.add(subsubPanel_h, BorderLayout.NORTH);
-		subsubsubPanel.add(subsubPanel_m, BorderLayout.CENTER);
-		subsubsubPanel.add(subsubPanel_l, BorderLayout.SOUTH);		
-		
-		
-		subPanel.setLayout(new BorderLayout()); 
-		subPanel.add(header,BorderLayout.NORTH);
-		subPanel.add(subsubsubPanel,BorderLayout.CENTER);
-		subPanel.add(footer,BorderLayout.SOUTH);
+		this.setOpaque(true);
 
-		subPanel.setBackground(Color.BLACK);
-		subPanel.setVisible(true);
-
-		left_l.setPreferredSize(new Dimension(50,0));
-		right_l.setPreferredSize(new Dimension(50,0));
-        this.setLayout(new BorderLayout());
-
-        this.add(left_l, BorderLayout.WEST);
-        this.add(right_l, BorderLayout.EAST);
-		this.add(subPanel, BorderLayout.CENTER);
-        this.setBackground(Color.BLACK);
-		this.setVisible(true);
+		
 	}
 	
 	public void accountInfoTableInit()
 	{
-		String[] columnNames = { "è‚¡é‡‘å¸å·               ",
-				"åˆ†è´¦å·", "äº§å“ç§ç±»",
-				"äº§å“åç§°","è´¦æˆ·åç§°                                                  ",
-				"å­˜åœ¨çŠ¶æ€","è´¦æˆ·ä½™é¢","å†»ç»“/æ­¢ä»˜çŠ¶æ€",
-				"å†»ç»“/æ­¢ä»˜é‡‘é¢","æ”¯å–æ–¹å¼","æŒ‚å¼çŠ¶æ€","å¼€æˆ·æ—¥æœŸ",
-				"å‡­è¯å·ç       ",
-				"åˆ†çº¢è´¦æˆ·      ",
-				"é”€æˆ·æ—¥æœŸ","è¯ä»¶ç±»å‹","è¯ä»¶å·ç ","å¼€æˆ·ç½‘ç‚¹","æ‰“å°åç§°"};
+
 		
-		Object[][] data = {
-{"1229630012293011021744", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},                     
-{"1229630012293011021745", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
-{"1229630012293011021746", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021747", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021748", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021749", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
-{"1229630012293011021750", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021751", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021752", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
-{"1229630012293011021753", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021754", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021755", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},
-{"1229630012293011021754", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
-{"1229630012293011021755", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
-{"1229630012293011021756", "000001", new Integer(282), "æ³•äººè‚¡","æ™‹ä¸­ä¸­çº§æœºæ¢°æœ‰é™å…¬å¸","æ­£å¸¸",new Float(0.00), "",new Float(0.00),"è¯ä»¶","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}  
-		};
+/*		Object[][] data = {
+{"1229630012293011021744", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},                     
+{"1229630012293011021745", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
+{"1229630012293011021746", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021747", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021748", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021749", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
+{"1229630012293011021750", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021751", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021752", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
+{"1229630012293011021753", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021754", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021755", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},
+{"1229630012293011021754", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""},  
+{"1229630012293011021755", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}, 
+{"1229630012293011021756", "000001", new Integer(282), "·¨ÈË¹É","½úÖĞÖĞ¼¶»úĞµÓĞÏŞ¹«Ë¾","Õı³£",new Float(0.00), "",new Float(0.00),"Ö¤¼ş","","2004-02-27","00000900275245","630012042011813718","","Z","1-383487534","362102",""}  
+		};*/
+		Object[][] data = getAccountInfoFromExele();
+		
 		result_tb = new JTable(data,columnNames);
 		result_tb.setBackground(Color.BLACK);
-		result_tb.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
+		result_tb.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
 		result_tb.setForeground(Color.LIGHT_GRAY);
 		result_tb.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		result_tb.setSelectionBackground(Color.LIGHT_GRAY);
 		result_tb.setShowGrid(false);
+		result_tb.setOpaque(true);
 		
 		MouseListener[] mls = result_tb.getMouseListeners();
 		for(MouseListener m : mls)
@@ -185,7 +126,7 @@ public class StockAccountInfoQueryResult extends CustomedPage{
 		//result_tb.editab
 		
 		result_tb.getTableHeader().setBackground(Color.BLACK);
-		result_tb.getTableHeader().setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
+		result_tb.getTableHeader().setFont(new Font("ËÎÌå", Font.PLAIN, 24));
 		result_tb.getTableHeader().setForeground(Color.LIGHT_GRAY);
 		result_tb.getTableHeader().setResizingAllowed(false);
 		result_tb.getTableHeader().setReorderingAllowed(false);
@@ -223,7 +164,7 @@ public class StockAccountInfoQueryResult extends CustomedPage{
 			public void keyPressed(KeyEvent e) {
 				if(e.getKeyCode() == KeyEvent.VK_ESCAPE)
 				{
-					bg.changePanel(self, last_page);
+					//bg.changePanel(self, last_page);
 				}
 			}
 
@@ -241,15 +182,66 @@ public class StockAccountInfoQueryResult extends CustomedPage{
 			
 		});
 		
-		jsp = new JScrollPane(result_tb);
-		jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		jsp.setBackground(Color.BLACK);
 	}
 	
-	public void setCustomedFocus()
+	public Object[][] getAccountInfoFromExele()
 	{
-		this.result_tb.grabFocus();
+		XSSFRow row;
+	    Object[][] data = null;
+		
+		File file = new File("src/Resource/StockAccountInfo.xlsx");
+	    FileInputStream fIP;
+		try {
+			fIP = new FileInputStream(file);
+			//Get the workbook instance for XLSX file 
+		      XSSFWorkbook workbook = new XSSFWorkbook(fIP);
+		      
+		      
+		      if(file.isFile() && file.exists())
+		      {
+		         System.out.println(
+		         "openworkbook.xlsx file open successfully.");
+		      }
+		      else
+		      {
+		         System.out.println(
+		         "Error to open openworkbook.xlsx file.");
+		      }
+		      
+		      XSSFSheet spreadsheet = workbook.getSheetAt(0);
+		      Iterator < Row > rowIterator = spreadsheet.iterator();
+		      
+		      int row_count = spreadsheet.getPhysicalNumberOfRows()-1;
+		      
+		      System.out.println(""+spreadsheet.getFirstRowNum());
+		      
+		      data = new Object[row_count][];
+		      
+		      int current_row = 0;
+		      
+		      row = (XSSFRow) rowIterator.next();
+		      while (rowIterator.hasNext()) 
+		      {
+		         row = (XSSFRow) rowIterator.next();
+		         //Iterator < Cell > cellIterator = row.cellIterator();
+		         
+		         StockAccount aa = new StockAccount();
+		         aa.setProperty(row);
+		         
+		         Object[] row_data = aa.changeToObjectArray();
+		         data[current_row] = row_data;
+		         current_row ++;
+
+		         saifqrl.add(aa);
+		      }
+		      
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	      
+		
+		return data;
 	}
 	
 

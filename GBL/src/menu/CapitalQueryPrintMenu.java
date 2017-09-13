@@ -8,7 +8,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleConstants;
 
 import gui.CustomedPage;
-import gui.StockAccountInfoQueryResult;
+import gui.StockAccountInfoQuery;
 
 public class CapitalQueryPrintMenu extends MenuText{
 
@@ -65,7 +65,7 @@ public class CapitalQueryPrintMenu extends MenuText{
 	{
 		if(_input >= 'A' && _input <= 'E')
 			return true;
-		else if(_input >= 'a' && _input <= 'E')
+		else if(_input >= 'a' && _input <= 'e')
 			return true;
 		return false;
 	}
@@ -85,7 +85,7 @@ public class CapitalQueryPrintMenu extends MenuText{
 	}
 	
 	public CustomedPage getAndSetNewPage() {
-		StockAccountInfoQueryResult saiqr = new StockAccountInfoQueryResult();
+		StockAccountInfoQuery saiqr = new StockAccountInfoQuery();
 		return saiqr;
 	}
 

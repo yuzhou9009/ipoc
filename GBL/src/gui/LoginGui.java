@@ -86,6 +86,10 @@ public class LoginGui extends CustomedPage{
 		userID.setBorder(underline_border);
 		siteID.setBorder(underline_border);
 		pswd.setBorder(underline_border);
+		
+		userID.setText("111");
+		siteID.setText("222");
+		pswd.setText("123");
 		//siteID.setBorder(border);
 		//pswd.setBorder(border);
 		
@@ -110,29 +114,22 @@ public class LoginGui extends CustomedPage{
 			pswd.removeMouseMotionListener(m);
 		
 		userID.addKeyListener(new KeyListener(){
-
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					siteID.grabFocus();
 				}
 				else if(e.getKeyCode() == KeyEvent.VK_DOWN) {
 					siteID.grabFocus();
-				}
-				
+				}				
 			}
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		});
@@ -156,14 +153,10 @@ public class LoginGui extends CustomedPage{
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		});
@@ -199,14 +192,10 @@ public class LoginGui extends CustomedPage{
 
 			@Override
 			public void keyReleased(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void keyTyped(KeyEvent arg0) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		});
