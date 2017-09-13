@@ -79,9 +79,9 @@ public class StockAccountInfoQuery extends CustomedPage{
 		header.setBackground(Color.BLACK);
 		header.setBorder(mb_h);
 		header.setForeground(Color.LIGHT_GRAY);
-		header.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		header.setText("  ç½‘ç‚¹ ï¼š362102                                        äº¤æ˜“ç  ï¼š"+tradeNum+"\n  æ—¥æœŸ ï¼š"
-				+getCurrentDate()+"             è‚¡é‡‘è´¦æˆ·ä¿¡æ¯æŸ¥è¯¢       å±å¹•å· ï¼š["+tradeNum+"-1]");
+		header.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		header.setText("  Íøµã £º362102                                        ½»Ò×Âë £º"+tradeNum+"\n  ÈÕÆÚ £º"
+				+getCurrentDate()+"             ¹É½ğÕË»§ĞÅÏ¢²éÑ¯       ÆÁÄ»ºÅ £º["+tradeNum+"-1]");
 		header.setEditable(false);
 		header.setFocusable(false);
 		
@@ -90,8 +90,8 @@ public class StockAccountInfoQuery extends CustomedPage{
 		footer.setBackground(Color.BLACK);
 		footer.setBorder(mb_f);
 		footer.setForeground(Color.LIGHT_GRAY);
-		footer.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		footer.setText("  æŸœå‘˜ï¼š364571  æè‹¥æ…§     pts/66   F3=é€€å‡º  F9=é‡å¤  F10=æäº¤  F1=å¸®åŠ©");
+		footer.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		footer.setText("  ¹ñÔ±£º364571  ÀîÈô»Û     pts/66   F3=ÍË³ö  F9=ÖØ¸´  F10=Ìá½»  F1=°ïÖú");
 		footer.setFocusable(false);
 		
 		
@@ -101,26 +101,26 @@ public class StockAccountInfoQuery extends CustomedPage{
 		MatteBorder mb_tem = new MatteBorder(3,3,3,3,Color.LIGHT_GRAY);
 		subsubPanel_part_0.setForeground(Color.LIGHT_GRAY);
 		subsubPanel_part_0.setBorder(mb_tem);
-		subsubPanel_part_0.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		subsubPanel_part_0.setText("<html><body>æŸ¥  è¯¢  æœº  æ„ ï¼š<br>è´¦  &nbsp&nbsp&nbspæˆ· ï¼š<br>äº§  å“  ç»„  åˆ« ï¼š<br>è‚¡  é‡‘  ç±»  å‹ ï¼š</body></html>");//\n\næŸ¥è¯¢ç»“æ„ï¼š\nè´¦æˆ·\näº§å“ç»„åˆ«");
+		subsubPanel_part_0.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		subsubPanel_part_0.setText("<html><body>²é  Ñ¯  »ú  ¹¹ £º<br>ÕË  &nbsp&nbsp&nbsp»§ £º<br>²ú  Æ·  ×é  ±ğ £º<br>¹É  ½ğ  Àà  ĞÍ £º</body></html>");//\n\n²éÑ¯½á¹¹£º\nÕË»§\n²úÆ·×é±ğ");
 		subsubPanel_part_0.setBounds(25, 35, 175, 125);
 		
 		subsubPanel_part_1.setForeground(Color.LIGHT_GRAY);
 		subsubPanel_part_1.setBorder(mb_tem);
-		subsubPanel_part_1.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		subsubPanel_part_1.setText("<html><body>å®¢  æˆ·  å  ç§° ï¼š</body></html>");
+		subsubPanel_part_1.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		subsubPanel_part_1.setText("<html><body>¿Í  »§  Ãû  ³Æ £º</body></html>");
 		subsubPanel_part_1.setBounds(25, 180, 175, 35);
 		
 		subsubPanel_part_2.setForeground(Color.LIGHT_GRAY);
 		subsubPanel_part_2.setBorder(mb_tem);
-		subsubPanel_part_2.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		subsubPanel_part_2.setText("<html><body>èµ·å§‹è´¦æˆ·ä½™é¢ï¼š<br>ç»ˆæ­¢è´¦æˆ·ä½™é¢ï¼š<br>èµ·å§‹å¼€æˆ·æ—¥æœŸï¼š<br>ç»ˆæ­¢å¼€æˆ·æ—¥æœŸï¼š</body></html>");//\n\næŸ¥è¯¢ç»“æ„ï¼š\nè´¦æˆ·\näº§å“ç»„åˆ«");
+		subsubPanel_part_2.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		subsubPanel_part_2.setText("<html><body>ÆğÊ¼ÕË»§Óà¶î£º<br>ÖÕÖ¹ÕË»§Óà¶î£º<br>ÆğÊ¼¿ª»§ÈÕÆÚ£º<br>ÖÕÖ¹¿ª»§ÈÕÆÚ£º</body></html>");//\n\n²éÑ¯½á¹¹£º\nÕË»§\n²úÆ·×é±ğ");
 		subsubPanel_part_2.setBounds(25, 300, 175, 125);
 		
 		xinxihang_l.setBackground(Color.BLACK);
 		xinxihang_l.setForeground(Color.LIGHT_GRAY);
-		xinxihang_l.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		xinxihang_l.setText("<html><body>&nbspä¿¡æ¯è¡Œï¼š</body></html>");
+		xinxihang_l.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		xinxihang_l.setText("<html><body>&nbspĞÅÏ¢ĞĞ£º</body></html>");
 		xinxihang_l.setBounds(0, 505, 175, 35);
 		
 		subsubPanel.add(subsubPanel_part_0);
@@ -128,8 +128,8 @@ public class StockAccountInfoQuery extends CustomedPage{
 		subsubPanel.add(subsubPanel_part_2);
 		subsubPanel.add(xinxihang_l);
 		
-
-		end_date_tf.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
+		end_date_tf.setBackground(Color.BLACK);
+		end_date_tf.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
 		end_date_tf.setBounds(250, 400, 200, 30);
 
 		subsubPanel.add(end_date_tf);
@@ -149,6 +149,7 @@ public class StockAccountInfoQuery extends CustomedPage{
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					
+					xinxihang_l.grabFocus();
 					saiqr = new StockAccountInfoQueryResult();
 					saiqr.setBounds(25, 180, 870, 320);
 
@@ -178,14 +179,14 @@ public class StockAccountInfoQuery extends CustomedPage{
 		
 		subsubheader_l.setBackground(Color.BLACK);
 		subsubheader_l.setForeground(Color.LIGHT_GRAY);
-		subsubheader_l.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		subsubheader_l.setText("<html><body>æŸ¥  è¯¢  æœº  æ„ ï¼š<br>è´¦  &nbsp&nbsp&nbspæˆ· ï¼š<br>äº§  å“  ç»„  åˆ« ï¼š</body></html>");//\n\næŸ¥è¯¢ç»“æ„ï¼š\nè´¦æˆ·\näº§å“ç»„åˆ«");
+		subsubheader_l.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		subsubheader_l.setText("<html><body>²é  Ñ¯  »ú  ¹¹ £º<br>ÕË  &nbsp&nbsp&nbsp»§ £º<br>²ú  Æ·  ×é  ±ğ £º</body></html>");//\n\n²éÑ¯½á¹¹£º\nÕË»§\n²úÆ·×é±ğ");
 		subsubheader_l.setPreferredSize(new Dimension(200,150));
 		
 		xinxihang_l.setBackground(Color.BLACK);
 		xinxihang_l.setForeground(Color.LIGHT_GRAY);
-		xinxihang_l.setFont(new Font("å®‹ä½“", Font.PLAIN, 24));
-		xinxihang_l.setText("  ä¿¡æ¯è¡Œï¼š");
+		xinxihang_l.setFont(new Font("ËÎÌå", Font.PLAIN, 24));
+		xinxihang_l.setText("  ĞÅÏ¢ĞĞ£º");
 		xinxihang_l.setPreferredSize(new Dimension(0,36));
 		
 		//result_tb.set
